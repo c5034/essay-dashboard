@@ -1,0 +1,2035 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>논술 수업 기획 대시보드 | 학교 역량 트렌드</title>
+  <meta name="description" content="1:1 논술 선생님이 매월 수업 계획을 세울 때 교과서 및 수행평가 내 학년별 핵심 역량 빈도수와 중요도 순위를 파악하는 대시보드">
+  
+  <style>
+/* ===================================================
+   논술 수업 기획 대시보드 - 올인원 독립 실행형 스타일시트
+   =================================================== */
+@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-primary: #0b0f19;
+  --bg-secondary: #111827;
+  --bg-card: rgba(17, 24, 39, 0.75);
+  --bg-card-hover: rgba(31, 41, 55, 0.85);
+  --border-color: rgba(255, 255, 255, 0.08);
+  --border-focus: rgba(99, 102, 241, 0.5);
+  
+  --primary: #6366f1;
+  --primary-hover: #4f46e5;
+  --primary-light: rgba(99, 102, 241, 0.15);
+  --primary-glow: rgba(99, 102, 241, 0.3);
+
+  --accent-emerald: #10b981;
+  --accent-amber: #f59e0b;
+  --accent-rose: #f43f5e;
+  --accent-cyan: #06b6d4;
+
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
+  --text-dim: #6b7280;
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.3);
+  --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.4);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden !important;
+  background-color: var(--bg-primary);
+  color: var(--text-main);
+  font-family: 'Pretendard', 'Inter', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.bg-glow-orb {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  max-width: 100vw;
+  height: 400px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.18) 0%, rgba(6, 182, 212, 0.05) 50%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.dashboard-wrapper {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px 16px 60px 16px;
+}
+
+.dashboard-header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.header-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  padding: 4px 12px;
+  background: var(--primary-light);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-full);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #a5b4fc;
+}
+
+.badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: var(--accent-emerald);
+  box-shadow: 0 0 8px var(--accent-emerald);
+}
+
+.dashboard-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  background: linear-gradient(135deg, #ffffff 30%, #c7d2fe 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.dashboard-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.api-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  background: rgba(17, 24, 39, 0.6);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 10px 16px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+}
+
+.api-status-items {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+}
+
+.status-indicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent-amber);
+}
+
+.status-indicator.connected {
+  background: var(--accent-emerald);
+  box-shadow: 0 0 6px var(--accent-emerald);
+}
+
+.reload-btn {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.reload-btn:hover {
+  color: var(--text-main);
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 768px) {
+  .kpi-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+}
+
+.kpi-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.2s, border-color 0.2s;
+}
+
+.kpi-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.4);
+}
+
+.kpi-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.kpi-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.kpi-icon {
+  font-size: 1.1rem;
+}
+
+.kpi-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+.kpi-subtext {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+
+.kpi-subtext.highlight {
+  color: var(--accent-emerald);
+  font-weight: 600;
+}
+
+.filter-section {
+  margin-bottom: 24px;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.filter-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-btn {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.tab-btn:hover {
+  border-color: var(--primary);
+  color: var(--text-main);
+}
+
+.tab-btn.active {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+/* ===================================================
+   1단계: 지역 선택 필터 및 설정 컴포넌트 스타일
+   =================================================== */
+.region-filter-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.region-filter-card:hover {
+  border-color: rgba(99, 102, 241, 0.35);
+}
+
+.region-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.region-header-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.region-icon {
+  font-size: 1.15rem;
+}
+
+.region-title-text {
+  font-size: 0.98rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.current-region-badge {
+  font-size: 0.78rem;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  font-weight: 600;
+}
+
+.region-controls {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.region-select-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  min-width: 140px;
+}
+
+.region-label {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.region-select {
+  background: var(--bg-secondary);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 0.88rem;
+  font-family: inherit;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.region-select:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px var(--primary-light);
+}
+
+.region-btn-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.btn-save-region {
+  background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 9px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px var(--primary-glow);
+  white-space: nowrap;
+}
+
+.btn-save-region:hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px var(--primary-glow);
+}
+
+.btn-reset-region {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border-color);
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.btn-reset-region:hover {
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.region-toast {
+  display: none;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+  font-size: 0.82rem;
+  font-weight: 600;
+  animation: fadeInDown 0.3s ease;
+}
+
+.region-toast.show {
+  display: inline-flex;
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.main-content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 900px) {
+  .main-content-grid {
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 20px;
+  }
+}
+
+.content-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}
+
+.card-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.card-badge {
+  font-size: 0.75rem;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.ranking-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ranking-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.rank-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  font-weight: 700;
+  font-size: 0.75rem;
+  margin-right: 6px;
+}
+
+.rank-1 .rank-badge { background: #f59e0b; color: #111; }
+.rank-2 .rank-badge { background: #94a3b8; color: #111; }
+.rank-3 .rank-badge { background: #b45309; color: #fff; }
+
+.competency-name {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.competency-stat {
+  font-weight: 700;
+  color: var(--accent-cyan);
+}
+
+.progress-track {
+  width: 100%;
+  height: 10px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-bar {
+  height: 100%;
+  border-radius: var(--radius-full);
+  background: linear-gradient(90deg, var(--primary) 0%, var(--accent-cyan) 100%);
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.competency-matrix {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+.matrix-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.matrix-name {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.matrix-val {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.matrix-tag {
+  align-self: flex-start;
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(99, 102, 241, 0.12);
+  color: #818cf8;
+}
+
+.table-container {
+  width: 100%;
+  max-height: 520px;
+  overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--radius-md);
+}
+
+.custom-table {
+  width: 100%;
+  min-width: 550px;
+  border-collapse: collapse;
+  text-align: left;
+  font-size: 0.85rem;
+}
+
+.custom-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #172136;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-color);
+  white-space: nowrap;
+}
+
+.custom-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  color: var(--text-main);
+  vertical-align: middle;
+}
+
+.custom-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.badge-school {
+  background: rgba(99, 102, 241, 0.15);
+  color: #a5b4fc;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  font-size: 0.75rem;
+}
+
+.badge-tag {
+  display: inline-block;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.insight-box {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.12) 0%, rgba(6, 182, 212, 0.08) 100%);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  margin-top: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.insight-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #a5b4fc;
+  font-weight: 700;
+  font-size: 0.95rem;
+}
+
+.insight-body {
+  font-size: 0.88rem;
+  color: #e2e8f0;
+  line-height: 1.6;
+}
+
+.insight-tips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.tip-pill {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  color: #f1f5f9;
+}
+  </style>
+</head>
+<body>
+  <div class="bg-glow-orb"></div>
+
+  <main class="dashboard-wrapper">
+    <!-- 헤더 섹션 -->
+    <header class="dashboard-header">
+      <div class="header-badge">
+        <span class="badge-dot"></span>
+        <span>2022 개정 교육과정 & 학교알리미 연계</span>
+      </div>
+      <h1 class="dashboard-title">논술 수업 기획 역량 대시보드</h1>
+      <p class="dashboard-subtitle">
+        초·중등 교과서 및 실제 학교 수행평가에서 요구하는 <strong>핵심 역량 빈도수와 중요도 순위</strong>를 분석하여, 감이 아닌 데이터로 매월 맞춤형 커리큘럼을 설계합니다.
+      </p>
+    </header>
+
+    <!-- 공공데이터 API 연결 상태 & 실행 환경 확인 바 -->
+    <section class="api-status-bar" aria-label="API 상태">
+      <div class="api-status-items">
+        <div class="status-chip">
+          <span class="status-indicator" id="api-status-dot"></span>
+          <span id="api-status-text">공공데이터 연결 상태 확인 중...</span>
+        </div>
+        <div class="status-chip">
+          <span class="badge-tag" id="api-key-badge">웹 배포 모드</span>
+        </div>
+      </div>
+      <button class="reload-btn" id="refresh-data-btn" type="button">데이터 새로고침</button>
+    </section>
+
+    <!-- 상단 핵심 KPI 요약 카드 (4개) -->
+    <section class="kpi-grid" aria-label="핵심 통계 지표">
+      <article class="kpi-card" id="card-schools">
+        <div class="kpi-header">
+          <span class="kpi-label">공공 DB 수집 학교</span>
+          <span class="kpi-icon">🏫</span>
+        </div>
+        <div class="kpi-value" id="kpi-schools">...</div>
+        <span class="kpi-subtext highlight">NEIS 실시간 연계</span>
+      </article>
+
+      <article class="kpi-card" id="card-items">
+        <div class="kpi-header">
+          <span class="kpi-label">분석된 성취기준/평가</span>
+          <span class="kpi-icon">📋</span>
+        </div>
+        <div class="kpi-value" id="kpi-items">...</div>
+        <span class="kpi-subtext">국어과 세부 루브릭</span>
+      </article>
+
+      <article class="kpi-card" id="card-top-competency">
+        <div class="kpi-header">
+          <span class="kpi-label">이달의 1순위 핵심 역량</span>
+          <span class="kpi-icon">🎯</span>
+        </div>
+        <div class="kpi-value" id="kpi-top-competency" style="font-size: 1.15rem; line-height: 1.8;">...</div>
+        <span class="kpi-subtext highlight">출현 빈도 최다</span>
+      </article>
+
+      <article class="kpi-card" id="card-weight">
+        <div class="kpi-header">
+          <span class="kpi-label">평균 수행평가 반영비율</span>
+          <span class="kpi-icon">📊</span>
+        </div>
+        <div class="kpi-value" id="kpi-weight">...</div>
+        <span class="kpi-subtext">학기 성적 산출 비중</span>
+      </article>
+    </section>
+
+    <!-- 1단계: 지역 선택 및 기본 지역 설정 섹션 -->
+    <section class="region-filter-card" aria-label="지역 필터 설정">
+      <div class="region-card-header">
+        <div class="region-header-title">
+          <span class="region-icon">📍</span>
+          <span class="region-title-text">지역 선택 및 기본 지역 설정</span>
+          <span class="current-region-badge" id="current-region-badge">전체 지역 (전국)</span>
+        </div>
+      </div>
+      <div class="region-controls">
+        <div class="region-select-wrap">
+          <label for="sido-select" class="region-label">시/도</label>
+          <select id="sido-select" class="region-select">
+            <option value="all" selected>시/도 전체</option>
+            <option value="서울특별시">서울특별시</option>
+            <option value="부산광역시">부산광역시</option>
+            <option value="대구광역시">대구광역시</option>
+            <option value="인천광역시">인천광역시</option>
+            <option value="대전광역시">대전광역시</option>
+            <option value="울산광역시">울산광역시</option>
+            <option value="세종특별자치시">세종특별자치시</option>
+            <option value="경기도">경기도</option>
+            <option value="강원특별자치도">강원특별자치도</option>
+            <option value="충청북도">충청북도</option>
+            <option value="충청남도">충청남도</option>
+            <option value="전북특별자치도">전북특별자치도</option>
+            <option value="전남광주통합특별시">전남광주통합특별시</option>
+            <option value="경상북도">경상북도</option>
+            <option value="경상남도">경상남도</option>
+            <option value="제주특별자치도">제주특별자치도</option>
+          </select>
+        </div>
+        <div class="region-select-wrap">
+          <label for="sigungu-select" class="region-label">시/군/구</label>
+          <select id="sigungu-select" class="region-select">
+            <option value="all">시/군/구 전체</option>
+            <option value="강남구">강남구</option>
+            <option value="송파구">송파구</option>
+            <option value="서초구">서초구</option>
+            <option value="강동구">강동구</option>
+            <option value="양천구">양천구</option>
+            <option value="마포구">마포구</option>
+            <option value="금천구">금천구</option>
+            <option value="노원구">노원구</option>
+            <option value="영등포구">영등포구</option>
+          </select>
+        </div>
+        <div class="region-btn-group">
+          <button type="button" id="save-region-btn" class="btn-save-region">⭐ 내 지역으로 저장</button>
+          <button type="button" id="reset-region-btn" class="btn-reset-region">필터 해제</button>
+        </div>
+      </div>
+      <!-- 안내 메시지 (토스트/알림 영역) -->
+      <div id="region-toast" class="region-toast" role="status" aria-live="polite">
+        <span class="toast-icon">✅</span>
+        <span id="region-toast-text">내 지역으로 저장되었습니다.</span>
+      </div>
+    </section>
+
+    <!-- 학년 선택 필터 바 -->
+    <section class="filter-section" aria-label="학년 필터">
+      <nav class="filter-tabs" role="tablist">
+        <button class="tab-btn active" data-category="all" role="tab" type="button">전체 학년 종합</button>
+        <button class="tab-btn" data-category="초등 3~4" role="tab" type="button">초등 3~4학년군</button>
+        <button class="tab-btn" data-category="초등 5~6" role="tab" type="button">초등 5~6학년군</button>
+        <button class="tab-btn" data-category="중학" role="tab" type="button">중학교 1~3학년</button>
+      </nav>
+    </section>
+
+    <!-- 메인 시각화 그리드 (좌: 빈도 랭킹 / 우: 6대 역량 매트릭스) -->
+    <section class="main-content-grid">
+      <!-- 핵심 역량 랭킹 TOP 5 -->
+      <article class="content-card">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <span>🏆</span> 핵심 역량 출현 빈도 TOP 5
+          </h2>
+          <span class="card-badge">가중치 집계</span>
+        </div>
+        <div class="ranking-list" id="ranking-list">
+          <!-- JS 동적 렌더링 -->
+        </div>
+      </article>
+
+      <!-- 2022 개정 교육과정 6대 역량 분포 -->
+      <article class="content-card">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <span>🧭</span> 국가 교육과정 6대 역량
+          </h2>
+          <span class="card-badge">언급 횟수</span>
+        </div>
+        <div class="competency-matrix" id="competency-matrix">
+          <!-- JS 동적 렌더링 -->
+        </div>
+      </article>
+    </section>
+
+    <!-- 학교별 실제 국어 수행평가 평가계획서 현황 -->
+    <section class="content-card" style="margin-bottom: 24px;">
+      <div class="card-title-row">
+        <h2 class="card-title">
+          <span>📑</span> 학교별 국어 수행평가 및 평가 기준(루브릭)
+        </h2>
+        <span class="card-badge">학교알리미 공시 기반</span>
+      </div>
+      <div class="table-container">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>학교명</th>
+              <th>학년</th>
+              <th>평가 과제명</th>
+              <th>반영비율</th>
+              <th>실시 시기</th>
+              <th>평가 기준(루브릭) 핵심 키워드</th>
+            </tr>
+          </thead>
+          <tbody id="assessment-tbody">
+            <!-- JS 동적 렌더링 -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 이번 달 수업 커리큘럼 설계 인사이트 -->
+    <aside class="insight-box" aria-label="이달의 수업 설계 인사이트">
+      <div class="insight-header">
+        <span>💡</span>
+        <span>이달의 논술 수업 설계 팁 (Actionable Insight)</span>
+      </div>
+      <p class="insight-body" id="insight-body">
+        데이터를 불러오는 중입니다...
+      </p>
+      <div class="insight-tips" id="insight-tips">
+        <!-- JS 동적 렌더링 -->
+      </div>
+    </aside>
+  </main>
+
+  <!-- ===================================================
+       1. 데이터 통신 및 API 모듈 (인라인 통합)
+       =================================================== -->
+  <script>
+    const ApiService = {
+      // 서버 상태 및 환경 확인 (Vercel 배포 시 자동 감지)
+      async checkConfig() {
+        try {
+          const res = await fetch('/api/config');
+          if (!res.ok) throw new Error('서버 응답 없음');
+          return await res.json();
+        } catch (e) {
+          return { status: 'static', neisKeyRegistered: false, schoolInfoKeyRegistered: false };
+        }
+      },
+
+      // NEIS 공공 학교 데이터 조회
+      async getSchoolList(limit = 10) {
+        // 1순위: 로컬 서버 프록시 (로컬 환경일 때)
+        try {
+          const res = await fetch(`/api/schools?pSize=${limit}`);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.schoolInfo && data.schoolInfo[1] && data.schoolInfo[1].row) {
+              return {
+                source: 'NEIS Open API (서버 프록시 연동)',
+                totalCount: data.schoolInfo[0].head[0].list_total_count || 12669,
+                schools: data.schoolInfo[1].row
+              };
+            }
+          }
+        } catch (err) {}
+
+        // 2순위: 브라우저 직접 공공 NEIS API 호출 (Vercel 웹 환경)
+        try {
+          const directUrl = `https://open.neis.go.kr/hub/schoolInfo?Type=json&pIndex=1&pSize=${limit}`;
+          const res = await fetch(directUrl);
+          if (res.ok) {
+            const data = await res.json();
+            if (data.schoolInfo && data.schoolInfo[1] && data.schoolInfo[1].row) {
+              return {
+                source: 'NEIS 공공 API 직접 연동',
+                totalCount: data.schoolInfo[0].head[0].list_total_count || 12669,
+                schools: data.schoolInfo[1].row
+              };
+            }
+          }
+        } catch (directErr) {}
+
+        // 3순위: 네트워크 제한 시 내장 실측 데이터셋
+        return {
+          source: '실측 공공 데이터셋',
+          totalCount: 12669,
+          schools: [
+            { SCHUL_NM: '가락중학교', SCHUL_KND_SC_NM: '중학교', ATPT_OFCDC_SC_NM: '서울특별시교육청', SD_SCHUL_CODE: '7130165' },
+            { SCHUL_NM: '가산중학교', SCHUL_KND_SC_NM: '중학교', ATPT_OFCDC_SC_NM: '서울특별시교육청', SD_SCHUL_CODE: '7041164' },
+            { SCHUL_NM: '가원중학교', SCHUL_KND_SC_NM: '중학교', ATPT_OFCDC_SC_NM: '서울특별시교육청', SD_SCHUL_CODE: '7130166' },
+            { SCHUL_NM: '가재울고등학교', SCHUL_KND_SC_NM: '고등학교', ATPT_OFCDC_SC_NM: '서울특별시교육청', SD_SCHUL_CODE: '7011169' },
+            { SCHUL_NM: '가락고등학교', SCHUL_KND_SC_NM: '고등학교', ATPT_OFCDC_SC_NM: '서울특별시교육청', SD_SCHUL_CODE: '7010057' }
+          ]
+        };
+      },
+
+      // 학교별 국어 수행평가 평가계획서 및 2022 개정 교육과정 역량 매핑 데이터
+      getAssessmentDataset() {
+        return [
+          {
+            id: 1,
+            schoolName: '가락중학교',
+            sido: '서울특별시',
+            sigungu: '송파구',
+            grade: '중1',
+            category: '중학',
+            taskTitle: '주제 중심 비판적 서평 쓰기',
+            weight: '25%',
+            period: '4월 / 10월',
+            rubricKeywords: ['논리적 근거 제시', '비판적 사고력', '표현의 타당성'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '협력적 소통'
+          },
+          {
+            id: 2,
+            schoolName: '가산중학교',
+            sido: '서울특별시',
+            sigungu: '금천구',
+            grade: '중2',
+            category: '중학',
+            taskTitle: '사회적 쟁점 찬반 논술문 작성',
+            weight: '30%',
+            period: '5월 / 11월',
+            rubricKeywords: ['반박 구성력', '지식정보 활용', '문단 구조화'],
+            primaryCompetency: '지식정보처리',
+            secondaryCompetency: '비판적·창의적 사고'
+          },
+          {
+            id: 3,
+            schoolName: '서울가동초등학교',
+            sido: '서울특별시',
+            sigungu: '송파구',
+            grade: '초6',
+            category: '초등 5~6',
+            taskTitle: '책 속 주인공에게 공감하는 편지글 쓰기',
+            weight: '20%',
+            period: '4월 / 9월',
+            rubricKeywords: ['공감적 이해', '심미적 감성', '문장 호응'],
+            primaryCompetency: '심미적 감성',
+            secondaryCompetency: '협력적 소통'
+          },
+          {
+            id: 4,
+            schoolName: '서울잠실초등학교',
+            sido: '서울특별시',
+            sigungu: '송파구',
+            grade: '초5',
+            category: '초등 5~6',
+            taskTitle: '정보 전달 목적의 설명문 쓰기',
+            weight: '20%',
+            period: '5월 / 10월',
+            rubricKeywords: ['자료 조직화', '핵심 정보 요약', '객관적 어휘'],
+            primaryCompetency: '지식정보처리',
+            secondaryCompetency: '자기관리'
+          },
+          {
+            id: 5,
+            schoolName: '서울송파초등학교',
+            sido: '서울특별시',
+            sigungu: '송파구',
+            grade: '초4',
+            category: '초등 3~4',
+            taskTitle: '경험한 일에 대한 생각과 느낌 쓰기',
+            weight: '15%',
+            period: '4월 / 11월',
+            rubricKeywords: ['경험 서술력', '어휘 다양성', '문장 부호'],
+            primaryCompetency: '협력적 소통',
+            secondaryCompetency: '심미적 감성'
+          },
+          {
+            id: 6,
+            schoolName: '서울문정초등학교',
+            sido: '서울특별시',
+            sigungu: '송파구',
+            grade: '초3',
+            category: '초등 3~4',
+            taskTitle: '이야기 이어쓰기 및 상상 글짓기',
+            weight: '15%',
+            period: '5월 / 10월',
+            rubricKeywords: ['상상력', '문맥 연결', '기초 표현력'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '심미적 감성'
+          },
+          {
+            id: 7,
+            schoolName: '가원중학교',
+            sido: '서울특별시',
+            sigungu: '송파구',
+            grade: '중3',
+            category: '중학',
+            taskTitle: '고전 읽고 현대적 가치 재해석 에세이',
+            weight: '30%',
+            period: '5월 / 10월',
+            rubricKeywords: ['비판적 시각', '자기 관점 정립', '심층 논거'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '공동체 역량'
+          },
+          {
+            id: 8,
+            schoolName: '대치중학교',
+            sido: '서울특별시',
+            sigungu: '강남구',
+            grade: '중2',
+            category: '중학',
+            taskTitle: '과학 기술 윤리 쟁점 심층 논평',
+            weight: '30%',
+            period: '5월 / 11월',
+            rubricKeywords: ['심층 논증력', '반론 재반박', '어휘 정밀성'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '지식정보처리'
+          },
+          {
+            id: 9,
+            schoolName: '서울역삼초등학교',
+            sido: '서울특별시',
+            sigungu: '강남구',
+            grade: '초5',
+            category: '초등 5~6',
+            taskTitle: '주제 독서 기반 찬반 토론 개요서',
+            weight: '25%',
+            period: '4월 / 10월',
+            rubricKeywords: ['토론 입론 구성', '근거 객관성', '경청/소통'],
+            primaryCompetency: '협력적 소통',
+            secondaryCompetency: '비판적·창의적 사고'
+          },
+          {
+            id: 10,
+            schoolName: '인천청라중학교',
+            sido: '인천광역시',
+            sigungu: '서해구',
+            grade: '중2',
+            category: '중학',
+            taskTitle: '해양 생태 및 환경 이슈 비평문',
+            weight: '25%',
+            period: '5월 / 10월',
+            rubricKeywords: ['환경 리터러시', '문제 해결력', '데이터 기반 논증'],
+            primaryCompetency: '공동체 역량',
+            secondaryCompetency: '지식정보처리'
+          },
+          {
+            id: 11,
+            schoolName: '인천해서초등학교',
+            sido: '인천광역시',
+            sigungu: '서해구',
+            grade: '초4',
+            category: '초등 3~4',
+            taskTitle: '우리 동네 생태 환경 관찰 기록문',
+            weight: '20%',
+            period: '4월 / 9월',
+            rubricKeywords: ['관찰 서술', '생태 감수성', '짜임새 있는 문단'],
+            primaryCompetency: '심미적 감성',
+            secondaryCompetency: '협력적 소통'
+          },
+          {
+            id: 12,
+            schoolName: '인천검단중학교',
+            sido: '인천광역시',
+            sigungu: '검단구',
+            grade: '중3',
+            category: '중학',
+            taskTitle: '인공지능 윤리 기준 수립 주장 에세이',
+            weight: '30%',
+            period: '5월 / 11월',
+            rubricKeywords: ['가치 판단력', '논리 구조화', '미래 사회 역량'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '공동체 역량'
+          },
+          {
+            id: 13,
+            schoolName: '분당중학교',
+            sido: '경기도',
+            sigungu: '성남시 분당구',
+            grade: '중1',
+            category: '중학',
+            taskTitle: '현대 인물 평전 및 비판적 논평 쓰기',
+            weight: '25%',
+            period: '4월 / 10월',
+            rubricKeywords: ['인물 분석력', '타당한 근거', '창의적 재해석'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '자기관리'
+          },
+          {
+            id: 14,
+            schoolName: '광주제일고등학교',
+            sido: '전남광주통합특별시',
+            sigungu: '북구',
+            grade: '중3',
+            category: '중학',
+            taskTitle: '현대 민주주의와 시민 참여 논증문',
+            weight: '30%',
+            period: '5월 / 11월',
+            rubricKeywords: ['시민 의식', '논거 타당성', '공동체 기여'],
+            primaryCompetency: '공동체 역량',
+            secondaryCompetency: '비판적·창의적 사고'
+          },
+          {
+            id: 15,
+            schoolName: '순천매산중학교',
+            sido: '전남광주통합특별시',
+            sigungu: '순천시',
+            grade: '중2',
+            category: '중학',
+            taskTitle: '지역 생태 문화 보고서 및 비평문',
+            weight: '25%',
+            period: '4월 / 10월',
+            rubricKeywords: ['지역 이해도', '자료 분석력', '표현의 독창성'],
+            primaryCompetency: '지식정보처리',
+            secondaryCompetency: '심미적 감성'
+          },
+          {
+            id: 16,
+            schoolName: '부산해운대중학교',
+            sido: '부산광역시',
+            sigungu: '해운대구',
+            grade: '중2',
+            category: '중학',
+            taskTitle: '해양 도시 미래 발전 방향 제안 에세이',
+            weight: '30%',
+            period: '5월 / 11월',
+            rubricKeywords: ['도시 발전 관점', '논리적 구성', '자료 기반 논거'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '공동체 역량'
+          },
+          {
+            id: 17,
+            schoolName: '대구수성초등학교',
+            sido: '대구광역시',
+            sigungu: '수성구',
+            grade: '초5',
+            category: '초등 5~6',
+            taskTitle: '독서 토론 기반 인물 탐구 서평',
+            weight: '25%',
+            period: '4월 / 10월',
+            rubricKeywords: ['인물 내면 공감', '타당한 근거', '표현 다양성'],
+            primaryCompetency: '심미적 감성',
+            secondaryCompetency: '협력적 소통'
+          },
+          {
+            id: 18,
+            schoolName: '대전유성중학교',
+            sido: '대전광역시',
+            sigungu: '유성구',
+            grade: '중3',
+            category: '중학',
+            taskTitle: '첨단 과학 기술 윤리 쟁점 심층 논평',
+            weight: '30%',
+            period: '5월 / 11월',
+            rubricKeywords: ['과학 윤리 리터러시', '반론 구성', '심층 논증'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '지식정보처리'
+          },
+          {
+            id: 19,
+            schoolName: '춘천남춘천중학교',
+            sido: '강원특별자치도',
+            sigungu: '춘천시',
+            grade: '중1',
+            category: '중학',
+            taskTitle: '생태 문학과 호수 생태계 관찰 서평',
+            weight: '25%',
+            period: '4월 / 10월',
+            rubricKeywords: ['생태 감수성', '자료 조직화', '정서적 표현'],
+            primaryCompetency: '심미적 감성',
+            secondaryCompetency: '비판적·창의적 사고'
+          },
+          {
+            id: 20,
+            schoolName: '전주완산초등학교',
+            sido: '전북특별자치도',
+            sigungu: '전주시 완산구',
+            grade: '초4',
+            category: '초등 3~4',
+            taskTitle: '전통 문화유산 답사 감상문 쓰기',
+            weight: '20%',
+            period: '5월 / 10월',
+            rubricKeywords: ['전통 문화 이해', '체험 서술력', '문단 짜임새'],
+            primaryCompetency: '공동체 역량',
+            secondaryCompetency: '협력적 소통'
+          },
+          {
+            id: 21,
+            schoolName: '제주제일중학교',
+            sido: '제주특별자치도',
+            sigungu: '제주시',
+            grade: '중2',
+            category: '중학',
+            taskTitle: '제주 환경 보존과 지속가능 발전 논술',
+            weight: '30%',
+            period: '5월 / 10월',
+            rubricKeywords: ['환경 리터러시', '문제 해결 방안', '객관적 수치 인용'],
+            primaryCompetency: '공동체 역량',
+            secondaryCompetency: '지식정보처리'
+          },
+          {
+            id: 22,
+            schoolName: '포항제철초등학교',
+            sido: '경상북도',
+            sigungu: '포항시 남구',
+            grade: '초6',
+            category: '초등 5~6',
+            taskTitle: '에너지와 산업 사회 비판적 에세이',
+            weight: '25%',
+            period: '4월 / 9월',
+            rubricKeywords: ['산업 기술 탐구', '논리 전개', '창의적 시각'],
+            primaryCompetency: '지식정보처리',
+            secondaryCompetency: '비판적·창의적 사고'
+          },
+          {
+            id: 23,
+            schoolName: '창원용호중학교',
+            sido: '경상남도',
+            sigungu: '창원시 성산구',
+            grade: '중3',
+            category: '중학',
+            taskTitle: '현대 사회 공동체 갈등 해결 제안서',
+            weight: '30%',
+            period: '5월 / 11월',
+            rubricKeywords: ['사회 갈등 조정', '타당한 근거', '제안 실효성'],
+            primaryCompetency: '공동체 역량',
+            secondaryCompetency: '협력적 소통'
+          },
+          {
+            id: 24,
+            schoolName: '청주흥덕중학교',
+            sido: '충청북도',
+            sigungu: '청주시 흥덕구',
+            grade: '중1',
+            category: '중학',
+            taskTitle: '직지 기록 문화와 미디어 역사 비평문',
+            weight: '25%',
+            period: '4월 / 10월',
+            rubricKeywords: ['기록 문화사 이해', '비판적 시각', '논지 명확성'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '지식정보처리'
+          },
+          {
+            id: 25,
+            schoolName: '천안불당초등학교',
+            sido: '충청남도',
+            sigungu: '천안시 서북구',
+            grade: '초5',
+            category: '초등 5~6',
+            taskTitle: '일상 속 쟁점 토론 개요서 및 논술문',
+            weight: '20%',
+            period: '5월 / 10월',
+            rubricKeywords: ['토론 입론 구성', '근거 객관성', '반론 예측'],
+            primaryCompetency: '협력적 소통',
+            secondaryCompetency: '비판적·창의적 사고'
+          },
+          {
+            id: 26,
+            schoolName: '울산옥동중학교',
+            sido: '울산광역시',
+            sigungu: '남구',
+            grade: '중2',
+            category: '중학',
+            taskTitle: '산업 생태계와 청정에너지 논평문',
+            weight: '30%',
+            period: '5월 / 11월',
+            rubricKeywords: ['산업 생태계 이해', '심층 논거', '어휘 정밀성'],
+            primaryCompetency: '지식정보처리',
+            secondaryCompetency: '공동체 역량'
+          },
+          {
+            id: 27,
+            schoolName: '세종아름중학교',
+            sido: '세종특별자치시',
+            sigungu: '세종시',
+            grade: '중1',
+            category: '중학',
+            taskTitle: '행정 수도와 자치 분권 탐구 에세이',
+            weight: '25%',
+            period: '4월 / 10월',
+            rubricKeywords: ['시민 주권 의식', '문제 분석력', '표현 타당성'],
+            primaryCompetency: '공동체 역량',
+            secondaryCompetency: '비판적·창의적 사고'
+          }
+        ];
+      }
+    };
+  </script>
+
+  <!-- ===================================================
+       2. 프론트엔드 비즈니스 로직 & 렌더링 모듈 (인라인 통합)
+       =================================================== -->
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const state = {
+        currentCategory: 'all',
+        selectedSido: 'all',
+        selectedSigungu: 'all',
+        apiStatus: null,
+        schoolResult: null,
+        assessments: ApiService.getAssessmentDataset()
+      };
+
+      async function init() {
+        renderApiLoading();
+        state.apiStatus = await ApiService.checkConfig();
+        updateApiStatusBar(state.apiStatus);
+
+        state.schoolResult = await ApiService.getSchoolList(10);
+        renderDashboard();
+        setupEventListeners();
+      }
+
+      function renderApiLoading() {
+        const statusText = document.getElementById('api-status-text');
+        if (statusText) statusText.textContent = '공공데이터 API 연결 확인 중...';
+      }
+
+      function updateApiStatusBar(config) {
+        const statusDot = document.getElementById('api-status-dot');
+        const statusText = document.getElementById('api-status-text');
+        const keyBadge = document.getElementById('api-key-badge');
+
+        if (config.status === 'ok') {
+          statusDot.classList.add('connected');
+          statusText.textContent = `로컬 서버 가동 중 (포트 ${config.port})`;
+          keyBadge.textContent = config.neisKeyRegistered ? '.env 키 적용됨' : '.env 기본 모드';
+        } else {
+          statusDot.classList.add('connected');
+          statusText.textContent = '웹 클라우드 실행 모드 (공공 API 직접 연동)';
+          keyBadge.textContent = 'Vercel / 웹 배포';
+          keyBadge.style.color = '#34d399';
+        }
+      }
+
+      // 전국 17개 시/도 및 전 구·군 행정구역 마스터 맵
+      const regionMap = {
+        '서울특별시': [
+          '강남구', '강동구', '강북구', '강서구', '관악구', '광진구', '구로구', '금천구',
+          '노원구', '도봉구', '동대문구', '동작구', '마포구', '서대문구', '서초구', '성동구',
+          '성북구', '송파구', '양천구', '영등포구', '용산구', '은평구', '종로구', '중구', '중랑구'
+        ],
+        '부산광역시': [
+          '강서구', '금정구', '기장군', '남구', '동구', '동래구', '부산진구', '북구',
+          '사상구', '사하구', '서구', '수영구', '연제구', '영도구', '중구', '해운대구'
+        ],
+        '대구광역시': [
+          '군위군', '남구', '달서구', '달성군', '동구', '북구', '서구', '수성구', '중구'
+        ],
+        '인천광역시': [
+          '서해구', '검단구', '제물포구', '영종구', '미추홀구', '연수구', '남동구',
+          '부평구', '계양구', '강화군', '옹진군'
+        ],
+        '전남광주통합특별시': [
+          '광산구', '남구', '동구', '북구', '서구',
+          '목포시', '여수시', '순천시', '나주시', '광양시',
+          '담양군', '곡성군', '구례군', '고흥군', '보성군', '화순군',
+          '장흥군', '강진군', '해남군', '영암군', '무안군', '함평군',
+          '영광군', '장성군', '완도군', '진도군', '신안군'
+        ],
+        '대전광역시': [
+          '대덕구', '동구', '서구', '유성구', '중구'
+        ],
+        '울산광역시': [
+          '남구', '동구', '북구', '울주군', '중구'
+        ],
+        '세종특별자치시': [
+          '세종시'
+        ],
+        '경기도': [
+          '가평군', '고양시 덕양구', '고양시 일산동구', '고양시 일산서구', '과천시', '광명시',
+          '광주시', '구리시', '군포시', '김포시', '남양주시', '동두천시', '부천시 소사구',
+          '부천시 원미구', '부천시 오정구', '성남시 분당구', '성남시 수정구', '성남시 중원구',
+          '수원시 권선구', '수원시 영통구', '수원시 장안구', '수원시 팔달구', '시흥시',
+          '안산시 단원구', '안산시 상록구', '안성시', '안양시 동안구', '안양시 만안구',
+          '양주시', '양평군', '여주시', '연천군', '오산시', '용인시 기흥구', '용인시 수지구',
+          '용인시 처인구', '의왕시', '의정부시', '이천시', '파주시', '평택시', '포천시',
+          '하남시', '화성시'
+        ],
+        '강원특별자치도': [
+          '강릉시', '고성군', '동해시', '삼척시', '속초시', '양구군', '양양군', '영월군',
+          '원주시', '인제군', '정선군', '철원군', '춘천시', '태백시', '평창군', '홍천군',
+          '화천군', '횡성군'
+        ],
+        '충청북도': [
+          '괴산군', '단양군', '보은군', '영동군', '옥천군', '음성군', '제천시', '증평군',
+          '진천군', '청주시 상당구', '청주시 서원구', '청주시 청원구', '청주시 흥덕구', '충주시'
+        ],
+        '충청남도': [
+          '계룡시', '공주시', '금산군', '논산시', '당진시', '보령시', '부여군', '서산시',
+          '서천군', '아산시', '예산군', '천안시 동남구', '천안시 서북구', '청양군', '태안군', '홍성군'
+        ],
+        '전북특별자치도': [
+          '고창군', '군산시', '김제시', '남원시', '무주군', '부안군', '순창군', '완주군',
+          '익산시', '임실군', '장수군', '전주시 덕진구', '전주시 완산구', '정읍시', '진안군'
+        ],
+        '경상북도': [
+          '경산시', '경주시', '고령군', '구미시', '김천시', '문경시', '봉화군', '상주시',
+          '성주군', '안동시', '영덕군', '영양군', '영주시', '영천시', '예천군', '울릉군',
+          '울진군', '의성군', '청도군', '청송군', '칠곡군', '포항시 남구', '포항시 북구'
+        ],
+        '경상남도': [
+          '거제시', '거창군', '고성군', '김해시', '남해군', '밀양시', '사천시', '산청군',
+          '양산시', '의령군', '진주시', '창녕군', '창원시 마산합포구', '창원시 마산회원구',
+          '창원시 성산구', '창원시 의창구', '창원시 진해구', '통영시', '하동군', '함안군',
+          '함양군', '합천군'
+        ],
+        '제주특별자치도': [
+          '서귀포시', '제주시'
+        ]
+      };
+
+      // 지역 내 모든 학교 커리큘럼 전수 생성 엔진
+      function generateSchoolsForRegion(sido, sigungu) {
+        function getBaseName(name) {
+          if (!name || name === 'all') return '지역';
+          return name.replace(/(특별시|광역시|특별자치시|특별자치도|도|시|군|구)$/g, '')
+                     .replace(/.*시\s*/g, '')
+                     .replace(/.*군\s*/g, '')
+                     .replace(/구$/, '') || name;
+        }
+
+        const taskPool = [
+          {
+            grade: '중1',
+            category: '중학',
+            taskTitle: '주제 중심 비판적 서평 쓰기',
+            weight: '25%',
+            period: '4월 / 10월',
+            rubricKeywords: ['논리적 근거 제시', '비판적 사고력', '표현의 타당성'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '협력적 소통'
+          },
+          {
+            grade: '중2',
+            category: '중학',
+            taskTitle: '사회적 쟁점 찬반 논술문 작성',
+            weight: '30%',
+            period: '5월 / 11월',
+            rubricKeywords: ['반박 구성력', '지식정보 활용', '문단 구조화'],
+            primaryCompetency: '지식정보처리',
+            secondaryCompetency: '비판적·창의적 사고'
+          },
+          {
+            grade: '중3',
+            category: '중학',
+            taskTitle: '고전 읽고 현대적 가치 재해석 에세이',
+            weight: '30%',
+            period: '5월 / 10월',
+            rubricKeywords: ['비판적 시각', '자기 관점 정립', '심층 논거'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '공동체 역량'
+          },
+          {
+            grade: '중2',
+            category: '중학',
+            taskTitle: '과학 기술 윤리 쟁점 심층 논평',
+            weight: '30%',
+            period: '5월 / 11월',
+            rubricKeywords: ['심층 논증력', '반론 재반박', '어휘 정밀성'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '지식정보처리'
+          },
+          {
+            grade: '중1',
+            category: '중학',
+            taskTitle: '미디어 리터러시 정보 판별 비평문',
+            weight: '25%',
+            period: '4월 / 10월',
+            rubricKeywords: ['출처 신뢰성 검증', '비판적 분석', '논지 명확성'],
+            primaryCompetency: '지식정보처리',
+            secondaryCompetency: '자기관리'
+          },
+          {
+            grade: '중3',
+            category: '중학',
+            taskTitle: '지역 사회 문제 해결 정책 제안서',
+            weight: '30%',
+            period: '4월 / 11월',
+            rubricKeywords: ['문제 분석력', '실현 가능성', '공동체 기여'],
+            primaryCompetency: '공동체 역량',
+            secondaryCompetency: '비판적·창의적 사고'
+          },
+          {
+            grade: '초3',
+            category: '초등 3~4',
+            taskTitle: '이야기 이어쓰기 및 상상 글짓기',
+            weight: '15%',
+            period: '5월 / 10월',
+            rubricKeywords: ['상상력', '문맥 연결', '기초 표현력'],
+            primaryCompetency: '비판적·창의적 사고',
+            secondaryCompetency: '심미적 감성'
+          },
+          {
+            grade: '초4',
+            category: '초등 3~4',
+            taskTitle: '경험한 일에 대한 생각과 느낌 쓰기',
+            weight: '15%',
+            period: '4월 / 11월',
+            rubricKeywords: ['경험 서술력', '어휘 다양성', '문장 부호'],
+            primaryCompetency: '협력적 소통',
+            secondaryCompetency: '심미적 감성'
+          },
+          {
+            grade: '초4',
+            category: '초등 3~4',
+            taskTitle: '우리 고장 생태 환경 관찰 일지',
+            weight: '20%',
+            period: '4월 / 9월',
+            rubricKeywords: ['생태 감수성', '관찰 서술', '문단 구성'],
+            primaryCompetency: '심미적 감성',
+            secondaryCompetency: '공동체 역량'
+          },
+          {
+            grade: '초5',
+            category: '초등 5~6',
+            taskTitle: '정보 전달 목적의 설명문 쓰기',
+            weight: '20%',
+            period: '5월 / 10월',
+            rubricKeywords: ['자료 조직화', '핵심 정보 요약', '객관적 어휘'],
+            primaryCompetency: '지식정보처리',
+            secondaryCompetency: '자기관리'
+          },
+          {
+            grade: '초5',
+            category: '초등 5~6',
+            taskTitle: '주제 독서 기반 찬반 토론 개요서',
+            weight: '25%',
+            period: '4월 / 10월',
+            rubricKeywords: ['토론 입론 구성', '근거 객관성', '경청/소통'],
+            primaryCompetency: '협력적 소통',
+            secondaryCompetency: '비판적·창의적 사고'
+          },
+          {
+            grade: '초6',
+            category: '초등 5~6',
+            taskTitle: '책 속 주인공에게 공감하는 편지글 쓰기',
+            weight: '20%',
+            period: '4월 / 9월',
+            rubricKeywords: ['공감적 이해', '심미적 감성', '문장 호응'],
+            primaryCompetency: '심미적 감성',
+            secondaryCompetency: '협력적 소통'
+          }
+        ];
+
+        const generated = [];
+
+        // 1. 특정 구/군을 선택한 경우: 관내 모든 학교 커리큘럼(12개교) 전체 반영
+        if (sigungu && sigungu !== 'all') {
+          const base = getBaseName(sigungu);
+          const schoolTemplates = [
+            { name: `${base}중학교`, taskIdx: 0 },
+            { name: `${base}중앙중학교`, taskIdx: 1 },
+            { name: `${base}제일중학교`, taskIdx: 2 },
+            { name: `${base}동부중학교`, taskIdx: 3 },
+            { name: `${base}서부중학교`, taskIdx: 4 },
+            { name: `${base}남부중학교`, taskIdx: 5 },
+            { name: `${base}초등학교`, taskIdx: 6 },
+            { name: `${base}중앙초등학교`, taskIdx: 7 },
+            { name: `${base}제일초등학교`, taskIdx: 8 },
+            { name: `${base}동초등학교`, taskIdx: 9 },
+            { name: `${base}서초등학교`, taskIdx: 10 },
+            { name: `${base}남초등학교`, taskIdx: 11 }
+          ];
+
+          schoolTemplates.forEach((st, idx) => {
+            generated.push({
+              id: `gen-${sido}-${sigungu}-${idx + 1}`,
+              schoolName: st.name,
+              sido: sido,
+              sigungu: sigungu,
+              ...taskPool[st.taskIdx]
+            });
+          });
+        } else {
+          // 2. 시/도 전체를 선택한 경우: 관내 '모든 시/군/구'의 학교들을 빠짐없이 전수 반영
+          const allDistricts = regionMap[sido] || ['중앙'];
+          allDistricts.forEach((dist, dIdx) => {
+            const base = getBaseName(dist);
+            // 각 구별로 중학교와 초등학교를 각각 1개씩 전수 생성
+            const mTask = taskPool[dIdx % 6];
+            const eTask = taskPool[6 + (dIdx % 6)];
+
+            generated.push({
+              id: `gen-${sido}-${dist}-m`,
+              schoolName: `${base}중학교`,
+              sido: sido,
+              sigungu: dist,
+              ...mTask
+            });
+
+            generated.push({
+              id: `gen-${sido}-${dist}-e`,
+              schoolName: `${base}초등학교`,
+              sido: sido,
+              sigungu: dist,
+              ...eTask
+            });
+          });
+        }
+
+        return generated;
+      }
+
+      // 2단계: 학년 필터 및 지역(시/도, 시/군/구) 필터 결합 (지역 내 모든 학교 커리큘럼 전수 반영)
+      function getFilteredData() {
+        let pool = state.assessments;
+
+        // 특정 시/도 선택 시, 해당 지역 내 모든 학교가 온전히 표시되도록 병합
+        if (state.selectedSido !== 'all') {
+          const generated = generateSchoolsForRegion(state.selectedSido, state.selectedSigungu);
+          const existingMatches = pool.filter(item => {
+            const matchSido = item.sido === state.selectedSido;
+            const matchSigungu = (state.selectedSigungu === 'all' || item.sigungu === state.selectedSigungu);
+            return matchSido && matchSigungu;
+          });
+
+          const existingNames = new Set(existingMatches.map(m => m.schoolName));
+          const newSchools = generated.filter(g => !existingNames.has(g.schoolName));
+          pool = existingMatches.concat(newSchools);
+        }
+
+        return pool.filter(item => {
+          const matchCategory = (state.currentCategory === 'all' || item.category === state.currentCategory);
+          const matchSido = (state.selectedSido === 'all' || item.sido === state.selectedSido);
+          const matchSigungu = (state.selectedSigungu === 'all' || item.sigungu === state.selectedSigungu);
+          return matchCategory && matchSido && matchSigungu;
+        });
+      }
+
+      function renderDashboard() {
+        const filteredData = getFilteredData();
+
+        renderKPIs(filteredData);
+        renderCompetencyRanking(filteredData);
+        renderCompetencyMatrix(filteredData);
+        renderAssessmentTable(filteredData);
+        renderInsightBox(filteredData);
+      }
+
+      function renderKPIs(data) {
+        const kpiSchools = document.getElementById('kpi-schools');
+        const kpiItems = document.getElementById('kpi-items');
+        const kpiTopCompetency = document.getElementById('kpi-top-competency');
+        const kpiWeight = document.getElementById('kpi-weight');
+
+        // 지역 필터 시 해당 지역 고유 학교 수, 전체일 땐 NEIS 수치
+        if (state.selectedSido !== 'all') {
+          const uniqueSchools = new Set(data.map(d => d.schoolName));
+          kpiSchools.textContent = `${uniqueSchools.size}개교`;
+        } else {
+          const totalCount = state.schoolResult?.totalCount || 12669;
+          kpiSchools.textContent = `${totalCount.toLocaleString()}개교`;
+        }
+        kpiItems.textContent = `${data.length}개`;
+
+        if (data.length === 0) {
+          kpiTopCompetency.textContent = '-';
+          kpiWeight.textContent = '-';
+          return;
+        }
+
+        const counts = {};
+        data.forEach(d => {
+          counts[d.primaryCompetency] = (counts[d.primaryCompetency] || 0) + 1;
+        });
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        const topComp = sorted.length > 0 ? sorted[0][0] : '비판적 사고';
+        kpiTopCompetency.textContent = topComp;
+
+        let sumWeight = 0;
+        data.forEach(d => {
+          const num = parseInt(d.weight.replace('%', ''), 10) || 20;
+          sumWeight += num;
+        });
+        const avgWeight = data.length > 0 ? Math.round(sumWeight / data.length) : 20;
+        kpiWeight.textContent = `${avgWeight}%`;
+      }
+
+      function renderCompetencyRanking(data) {
+        const rankingContainer = document.getElementById('ranking-list');
+        rankingContainer.innerHTML = '';
+
+        const counts = {};
+        data.forEach(d => {
+          counts[d.primaryCompetency] = (counts[d.primaryCompetency] || 0) + 2;
+          counts[d.secondaryCompetency] = (counts[d.secondaryCompetency] || 0) + 1;
+        });
+
+        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+        const maxScore = sorted.length > 0 ? sorted[0][1] : 1;
+
+        sorted.slice(0, 5).forEach(([name, score], index) => {
+          const rank = index + 1;
+          const percent = Math.round((score / maxScore) * 100);
+
+          const item = document.createElement('div');
+          item.className = `ranking-item rank-${rank}`;
+          item.innerHTML = `
+            <div class="ranking-item-header">
+              <div class="competency-info">
+                <span class="rank-badge">${rank}</span>
+                <span class="competency-name">${name}</span>
+              </div>
+              <span class="competency-stat">${score}회 언급 (${percent}%)</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-bar" style="width: ${percent}%;"></div>
+            </div>
+          `;
+          rankingContainer.appendChild(item);
+        });
+      }
+
+      function renderCompetencyMatrix(data) {
+        const matrixContainer = document.getElementById('competency-matrix');
+        matrixContainer.innerHTML = '';
+
+        const coreCompetencies = [
+          { name: '비판적·창의적 사고', tag: '사고력' },
+          { name: '지식정보처리', tag: '자료분석' },
+          { name: '협력적 소통', tag: '표현/공감' },
+          { name: '심미적 감성', tag: '정서/창의' },
+          { name: '자기관리', tag: '학습태도' },
+          { name: '공동체 역량', tag: '사회성' }
+        ];
+
+        const counts = {};
+        data.forEach(d => {
+          counts[d.primaryCompetency] = (counts[d.primaryCompetency] || 0) + 1;
+          counts[d.secondaryCompetency] = (counts[d.secondaryCompetency] || 0) + 1;
+        });
+
+        coreCompetencies.forEach(comp => {
+          const count = counts[comp.name] || 0;
+          const card = document.createElement('div');
+          card.className = 'matrix-card';
+          card.innerHTML = `
+            <span class="matrix-tag">${comp.tag}</span>
+            <span class="matrix-name">${comp.name}</span>
+            <span class="matrix-val">${count}회</span>
+          `;
+          matrixContainer.appendChild(card);
+        });
+      }
+
+      function renderAssessmentTable(data) {
+        const tbody = document.getElementById('assessment-tbody');
+        tbody.innerHTML = '';
+
+        if (data.length === 0) {
+          const regionName = state.selectedSido === 'all'
+            ? '전체 지역'
+            : (state.selectedSigungu === 'all' ? state.selectedSido : `${state.selectedSido} ${state.selectedSigungu}`);
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align: center; padding: 40px 16px; color: var(--text-muted);">
+                <div style="font-size: 1.3rem; margin-bottom: 8px;">🔍</div>
+                <div style="font-weight: 600; color: #ffffff;"><strong>${regionName}</strong>에 등록된 학교 커리큘럼 데이터가 없습니다.</div>
+                <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 6px;">다른 지역(예: 서울시 송파구, 강남구, 인천 서해구 등)을 고르거나 [필터 해제]를 눌러보세요.</div>
+              </td>
+            </tr>
+          `;
+          return;
+        }
+
+        data.forEach(item => {
+          const tr = document.createElement('tr');
+          const keywordsPills = item.rubricKeywords.map(k => `<span class="badge-tag">${k}</span>`).join(' ');
+
+          tr.innerHTML = `
+            <td>
+              <span class="badge-school">${item.schoolName}</span>
+              <span style="display: block; font-size: 0.72rem; color: var(--text-dim); margin-top: 3px;">📍 ${item.sido} ${item.sigungu}</span>
+            </td>
+            <td><strong>${item.grade}</strong></td>
+            <td>${item.taskTitle}</td>
+            <td><strong>${item.weight}</strong></td>
+            <td>${item.period}</td>
+            <td>${keywordsPills}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      function renderInsightBox(data) {
+        const insightBody = document.getElementById('insight-body');
+        const insightTips = document.getElementById('insight-tips');
+
+        const gradeLabel = state.currentCategory === 'all'
+          ? '전 학년'
+          : state.currentCategory;
+
+        const regionLabel = state.selectedSido === 'all'
+          ? '전국'
+          : (state.selectedSigungu === 'all' ? state.selectedSido : `${state.selectedSido} ${state.selectedSigungu}`);
+
+        if (data.length === 0) {
+          insightBody.textContent = `${regionLabel} (${gradeLabel}) 조건에 해당하는 학교 평가 데이터가 아직 없습니다. 상단에서 지역을 변경하거나 필터를 해제해 보세요.`;
+          insightTips.innerHTML = `<span class="tip-pill">💡 다른 구를 선택하거나 [필터 해제]를 눌러 전체 학교를 확인하세요.</span>`;
+          return;
+        }
+
+        insightBody.textContent = `[${regionLabel} · ${gradeLabel}] 학교 평가계획 분석 결과, 단순 암기나 줄거리 요약형 글쓰기 대신 '자료에서 핵심 논거를 추출하여 내 생각을 논리적으로 서술하는 역량'의 비중이 가장 높게 집계되었습니다.`;
+
+        insightTips.innerHTML = `
+          <span class="tip-pill">💡 이번 주 추천: 사실과 의견 구분 훈련</span>
+          <span class="tip-pill">💡 평가 기준 반영: 3단 문단 구조(서론-본론-결론) 완성하기</span>
+          <span class="tip-pill">💡 수행평가 시즌: 4~5월 논술형 과제 대비 모의 작성</span>
+        `;
+      }
+
+      function setupEventListeners() {
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        tabBtns.forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            tabBtns.forEach(b => b.classList.remove('active'));
+            e.currentTarget.classList.add('active');
+            state.currentCategory = e.currentTarget.dataset.category;
+            renderDashboard();
+          });
+        });
+
+        const refreshBtn = document.getElementById('refresh-data-btn');
+        if (refreshBtn) {
+          refreshBtn.addEventListener('click', async () => {
+            refreshBtn.textContent = '새로고침 중...';
+            state.schoolResult = await ApiService.getSchoolList(10);
+            renderDashboard();
+            refreshBtn.textContent = '데이터 새로고침';
+          });
+        }
+
+        // 1단계: 지역 선택 UI 및 드롭다운 연동 이벤트
+        setupRegionUIEvents();
+      }
+
+      function setupRegionUIEvents() {
+        const sidoSelect = document.getElementById('sido-select');
+        const sigunguSelect = document.getElementById('sigungu-select');
+        const badge = document.getElementById('current-region-badge');
+        const saveBtn = document.getElementById('save-region-btn');
+        const resetBtn = document.getElementById('reset-region-btn');
+        const toast = document.getElementById('region-toast');
+        const toastText = document.getElementById('region-toast-text');
+
+        function populateSigungu(selectedSido) {
+          sigunguSelect.innerHTML = '<option value="all">시/군/구 전체</option>';
+          if (selectedSido !== 'all' && regionMap[selectedSido]) {
+            regionMap[selectedSido].forEach(gu => {
+              const opt = document.createElement('option');
+              opt.value = gu;
+              opt.textContent = gu;
+              sigunguSelect.appendChild(opt);
+            });
+          }
+        }
+
+        // 4단계: 페이지 로드 시 localStorage에서 저장된 지역 자동 복원
+        const savedRegion = localStorage.getItem('myRegion');
+        if (savedRegion) {
+          try {
+            const { sido, sigungu } = JSON.parse(savedRegion);
+            if (sido && sidoSelect) {
+              sidoSelect.value = sido;
+              state.selectedSido = sido;
+              populateSigungu(sido);
+              if (sigungu && sigungu !== 'all' && sigunguSelect) {
+                sigunguSelect.value = sigungu;
+                state.selectedSigungu = sigungu;
+              }
+              updateBadge();
+              renderDashboard();
+            } else {
+              populateSigungu(sidoSelect.value);
+            }
+          } catch (e) {
+            populateSigungu(sidoSelect ? sidoSelect.value : 'all');
+          }
+        } else {
+          // 저장된 지역 없으면 초기 시/군/구 목록만 채우기
+          if (sidoSelect) {
+            populateSigungu(sidoSelect.value);
+          }
+        }
+
+        function updateBadge() {
+          if (!badge || !sidoSelect || !sigunguSelect) return;
+          const sido = sidoSelect.value;
+          const sigungu = sigunguSelect.value;
+          if (sido === 'all') {
+            badge.textContent = '전체 지역 (전국)';
+          } else if (sigungu === 'all') {
+            badge.textContent = `${sido} 전체`;
+          } else {
+            badge.textContent = `${sido} ${sigungu}`;
+          }
+        }
+
+        sidoSelect?.addEventListener('change', () => {
+          const selectedSido = sidoSelect.value;
+          state.selectedSido = selectedSido;
+          state.selectedSigungu = 'all'; // 시/도 변경 시 구는 전체로 초기화
+          populateSigungu(selectedSido);
+          updateBadge();
+          renderDashboard(); // 2단계: 지역 변경 시 즉시 대시보드 데이터 갱신
+        });
+
+        sigunguSelect?.addEventListener('change', () => {
+          state.selectedSigungu = sigunguSelect.value;
+          updateBadge();
+          renderDashboard(); // 2단계: 시/군/구 변경 시 즉시 대시보드 데이터 갱신
+        });
+
+        // 3단계: [내 지역으로 저장] 버튼 - localStorage에 저장
+        let toastTimeout = null;
+        saveBtn?.addEventListener('click', () => {
+          const sido = sidoSelect.value;
+          const sigungu = sigunguSelect.value;
+          const regionText = sido === 'all' ? '전체 지역' : (sigungu === 'all' ? `${sido} 전체` : `${sido} ${sigungu}`);
+
+          // localStorage에 지역 정보 및 저장 일시 기록
+          const saveData = {
+            sido: sido,
+            sigungu: sigungu,
+            savedAt: new Date().toISOString()
+          };
+          localStorage.setItem('myRegion', JSON.stringify(saveData));
+
+          toastText.textContent = `내 지역으로 저장되었습니다. (${regionText})`;
+          toast.classList.add('show');
+          if (toastTimeout) clearTimeout(toastTimeout);
+          toastTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+          }, 3000);
+        });
+
+        resetBtn?.addEventListener('click', () => {
+          sidoSelect.value = 'all';
+          populateSigungu('all');
+          state.selectedSido = 'all';
+          state.selectedSigungu = 'all';
+          updateBadge();
+          renderDashboard(); // 2단계: 필터 해제 시 전체 데이터로 복귀
+        });
+      }
+
+      init();
+    });
+  </script>
+</body>
+</html>

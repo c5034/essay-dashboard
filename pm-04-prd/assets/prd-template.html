@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>{{서비스 이름}} · 서비스 기획안</title>
+<!--
+  pm-04-prd 기획안 틀 · 클로드가 S7에서 채운다
+  규칙
+  1. 중괄호 두 겹으로 감싼 자리는 docs/02-PRD.md 에 적은 말을 그대로 옮긴다. 새로 지어내지 않는다
+  2. "반복" 주석이 붙은 블록은 항목 수만큼 복사한다. 항목이 없으면 블록을 지운다
+  3. 칸 순서는 config.md 개조 포인트 1의 prd_sections 를 따른다. 더한 칸은 "그 밖의 칸" 블록을 복사해 쓴다
+  4. CSS 는 고치지 않는다. 외부 글꼴, 외부 스크립트를 넣지 않는다
+  5. 낫표와 em dash 를 쓰지 않는다
+-->
+<style>
+  :root{
+    --ink:#2A2A28; --ink-soft:#4C4D59; --ink-faint:#8A8987;
+    --paper:#F3F3F2; --card:#FFFFFF; --line:#E4E3E0; --rule:#D8D6D1;
+    --sand:#E0CCBE; --hl:#EBFF2C;
+    --font:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);
+    line-height:1.6;word-break:keep-all;overflow-wrap:break-word;}
+  .wrap{max-width:980px;margin:0 auto;padding:56px 24px 80px;}
+  .kicker{font-size:14px;font-weight:700;letter-spacing:.04em;color:var(--ink-soft);}
+  h1{font-size:44px;line-height:1.15;letter-spacing:-0.02em;margin:14px 0 0;}
+  .lead{font-size:21px;color:var(--ink-soft);margin:18px 0 0;max-width:760px;}
+  .lead b{color:var(--ink);background:linear-gradient(transparent 58%,var(--hl) 58%);}
+  .meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:26px;padding-top:18px;
+    border-top:2px solid var(--ink);font-size:14px;color:var(--ink-soft);}
+  .meta b{color:var(--ink);font-weight:600;margin-left:6px;}
+  .meta a{color:var(--ink);}
+
+  .road{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:34px;}
+  .road div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 8px;
+    font-size:13px;text-align:center;color:var(--ink-soft);}
+  .road div b{display:block;font-size:15px;color:var(--ink);margin-top:2px;}
+  .road div.now{background:var(--ink);color:#CFCDCA;border-color:var(--ink);}
+  .road div.now b{color:#fff;}
+
+  section{margin-top:44px;}
+  h2{font-size:14px;font-weight:700;letter-spacing:.04em;color:var(--ink-soft);margin:0 0 14px;
+    display:flex;align-items:center;gap:10px;}
+  h2 .when{font-size:12px;font-weight:600;background:var(--sand);color:var(--ink);padding:2px 8px;border-radius:5px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px 26px;}
+  .big{font-size:24px;font-weight:600;line-height:1.45;letter-spacing:-0.01em;}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .chip{display:inline-block;background:var(--paper);border:1px solid var(--line);border-radius:999px;
+    padding:6px 14px;font-size:15px;margin:4px 6px 0 0;}
+
+  .shift{display:grid;grid-template-columns:1fr 40px 1fr;align-items:stretch;gap:8px;}
+  .shift .arrow{display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--ink-faint);}
+  .shift .tag{font-size:13px;font-weight:600;color:var(--ink-soft);}
+  .shift .card.new{border:2px solid var(--ink);}
+  .shift .name{font-size:22px;font-weight:700;margin-top:6px;}
+  .shift .desc{font-size:16px;color:var(--ink-soft);margin-top:8px;}
+
+  ol.flow{list-style:none;margin:0;padding:0;counter-reset:f;}
+  ol.flow li{counter-increment:f;display:grid;grid-template-columns:44px 1fr;gap:12px;padding:14px 0;
+    border-top:1px solid var(--rule);font-size:17px;}
+  ol.flow li:first-child{border-top:2px solid var(--ink);}
+  ol.flow li::before{content:counter(f);font-size:22px;font-weight:700;color:var(--ink-faint);}
+
+  table{width:100%;border-collapse:collapse;font-size:16px;}
+  th{text-align:left;font-size:13px;color:var(--ink-soft);font-weight:600;padding:0 12px 10px 0;border-bottom:2px solid var(--ink);}
+  td{padding:12px 12px 12px 0;border-bottom:1px solid var(--rule);vertical-align:top;}
+  td:first-child{font-weight:600;}
+
+  .goal{display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:start;padding:16px 0;border-top:1px solid var(--rule);}
+  .goal:first-of-type{border-top:2px solid var(--ink);}
+  .goal .box{width:26px;height:26px;border:2px solid var(--ink);border-radius:6px;margin-top:2px;}
+  .goal p{margin:0;font-size:18px;font-weight:500;}
+  .due{display:inline-block;background:var(--hl);font-weight:700;font-size:14px;padding:3px 10px;border-radius:6px;margin-bottom:10px;}
+
+  ul.later{list-style:none;margin:0;padding:0;}
+  ul.later li{padding:12px 0;border-top:1px solid var(--rule);font-size:16px;}
+  ul.later li:first-child{border-top:2px solid var(--ink);}
+  ul.later li span{color:var(--ink-soft);}
+
+  .unknown{background:var(--ink);color:#EDEDEA;border-radius:12px;padding:22px 26px;}
+  .unknown h2{color:var(--sand);}
+  .unknown ul{margin:0;padding-left:20px;}
+  .unknown li{margin:6px 0;font-size:16px;}
+
+  footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px;color:var(--ink-faint);}
+
+  @media (max-width:640px){
+    h1{font-size:32px;} .lead{font-size:18px;}
+    .two,.shift{grid-template-columns:1fr;} .shift .arrow{transform:rotate(90deg);height:28px;}
+    .road{grid-template-columns:repeat(4,1fr);}
+  }
+  @page{size:A4;margin:12mm;}
+  @media print{
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    body{background:#fff;} .wrap{padding:0;max-width:none;}
+    section,.card,.goal,ol.flow li{break-inside:avoid;}
+    .road{grid-template-columns:repeat(7,1fr);} .two,.shift{grid-template-columns:1fr 1fr;} .shift{grid-template-columns:1fr 40px 1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 머리 · 한 줄 소개 칸 -->
+  <div class="kicker">PRD · 서비스 기획안</div>
+  <h1>{{서비스 이름}}</h1>
+  <p class="lead">{{한 줄 소개. 가장 중요한 말 한 토막을 <b>굵게</b>}}</p>
+  <div class="meta">
+    <span>작성<b>{{작성일 · 4회차}}</b></span>
+    <span>갈 길<b>{{A 새 서비스 / B 대시보드 키우기}}</b></span>
+    <!-- 3회차 주소가 없으면 이 줄을 지운다 -->
+    <span>3회차 주소<b><a href="{{3회차 주소}}">{{3회차 주소}}</a></b></span>
+    <span>이번에 만들 기능<b>{{기능 이름}}</b></span>
+  </div>
+
+  <!-- 10주 중 이 기획안을 다시 쓰는 회차 · 고치지 않는다 -->
+  <div class="road">
+    <div class="now">4회차<b>기획안</b></div>
+    <div>5회차<b>기능 만들기</b></div>
+    <div>6회차<b>저장</b></div>
+    <div>7회차<b>기록</b></div>
+    <div>8회차<b>검증</b></div>
+    <div>9회차<b>개선</b></div>
+    <div>10회차<b>발표</b></div>
+  </div>
+
+  <!-- 문제 · 대상 -->
+  <section>
+    <div class="two">
+      <div>
+        <h2>문제</h2>
+        <div class="card big">{{문제 문장}}</div>
+      </div>
+      <div>
+        <h2>대상</h2>
+        <div class="card">
+          <div style="font-size:18px;font-weight:600;">{{대상 한 줄}}</div>
+          <!-- 반복 · 대상을 설명하는 짧은 말. 없으면 이 줄을 지운다 -->
+          <span class="chip">{{대상 특징}}</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 출발점 → 이번에 만들 기능 -->
+  <section>
+    <h2>3회차 출발점에서 이번에 만들 기능으로 <span class="when">5회차</span></h2>
+    <div class="shift">
+      <div class="card">
+        <div class="tag">출발점 · 3회차</div>
+        <div class="desc" style="color:var(--ink);font-size:17px;">{{3회차에 만든 것. 과제를 못 했으면 "없음"}}</div>
+        <div class="desc" style="margin-top:12px;font-weight:600;color:var(--ink);">아쉬웠던 점</div>
+        <!-- 반복 · 아쉬운 점 한 줄 -->
+        <div class="desc">· {{아쉬운 점}}</div>
+      </div>
+      <div class="arrow">→</div>
+      <!-- 반복 · features_now 가 2 이상이면 이 카드를 기능 수만큼 -->
+      <div class="card new">
+        <div class="tag">이번에 만들 기능</div>
+        <div class="name">{{기능 이름}}</div>
+        <div class="desc">{{기능 한 줄 설명}}</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 동작 순서 -->
+  <section>
+    <h2>동작 순서 · 보이는 것, 누르는 것, 생기는 것</h2>
+    <ol class="flow">
+      <!-- 반복 · 동작 순서 한 줄 -->
+      <li>{{동작 한 줄}}</li>
+    </ol>
+  </section>
+
+  <!-- 저장할 것 · 기록할 행동 -->
+  <section>
+    <div class="two">
+      <div>
+        <h2>저장할 것 <span class="when">6회차</span></h2>
+        <div class="card">
+          <table>
+            <thead><tr><th>항목</th><th>예</th></tr></thead>
+            <tbody>
+              <!-- 반복 · 저장할 항목 -->
+              <tr><td>{{항목 이름}}</td><td>{{예}}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h2>기록할 행동 <span class="when">7회차</span></h2>
+        <div class="card">
+          <table>
+            <thead><tr><th>행동</th><th>언제 1번으로 세나</th></tr></thead>
+            <tbody>
+              <!-- 반복 · 기록할 행동 -->
+              <tr><td>{{행동}}</td><td>{{세는 때}}</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 성공 기준 -->
+  <section>
+    <h2>성공 기준 <span class="when">8회차</span></h2>
+    <div class="card">
+      <div class="due">기한 · {{success_deadline}}</div>
+      <!-- 반복 · 성공 기준 문장 -->
+      <div class="goal"><div class="box"></div><p>{{성공 기준 문장}}</p></div>
+    </div>
+  </section>
+
+  <!-- 나중에 -->
+  <section>
+    <h2>나중에 · 지금은 안 만듦 <span class="when">9회차</span></h2>
+    <ul class="later">
+      <!-- 반복 · 나중에 만들 기능 -->
+      <li><b>{{기능}}</b> <span>· {{왜 나중인가}}</span></li>
+    </ul>
+  </section>
+
+  <!-- 그 밖의 칸 · prd_sections 에 더한 칸이 있을 때만. 없으면 이 블록을 지운다 -->
+  <section>
+    <h2>{{칸 이름}}</h2>
+    <div class="card">{{칸 내용}}</div>
+  </section>
+
+  <!-- 아직 모르는 것 · 비어 있으면 "없음" 한 줄 -->
+  <section class="unknown">
+    <h2>아직 모르는 것 · 5회차에 다시 묻기</h2>
+    <ul>
+      <!-- 반복 · 아직 모르는 것 -->
+      <li>{{모르는 것}}</li>
+    </ul>
+  </section>
+
+  <footer>
+    이 기획안의 원본은 docs/02-PRD.md 입니다. 클로드는 원본을 읽고 만듭니다. 고칠 때는 원본을 고치고 기획안을 다시 만듭니다.
+  </footer>
+</div>
+</body>
+</html>

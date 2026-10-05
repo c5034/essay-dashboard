@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>내 지역 학교 커리큘럼 · 서비스 기획안</title>
+<style>
+  :root{
+    --ink:#2A2A28; --ink-soft:#4C4D59; --ink-faint:#8A8987;
+    --paper:#F3F3F2; --card:#FFFFFF; --line:#E4E3E0; --rule:#D8D6D1;
+    --sand:#E0CCBE; --hl:#EBFF2C;
+    --font:'Pretendard','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--font);
+    line-height:1.6;word-break:keep-all;overflow-wrap:break-word;}
+  .wrap{max-width:980px;margin:0 auto;padding:56px 24px 80px;}
+  .kicker{font-size:14px;font-weight:700;letter-spacing:.04em;color:var(--ink-soft);}
+  h1{font-size:44px;line-height:1.15;letter-spacing:-0.02em;margin:14px 0 0;}
+  .lead{font-size:21px;color:var(--ink-soft);margin:18px 0 0;max-width:760px;}
+  .lead b{color:var(--ink);background:linear-gradient(transparent 58%,var(--hl) 58%);}
+  .meta{display:flex;flex-wrap:wrap;gap:10px 22px;margin-top:26px;padding-top:18px;
+    border-top:2px solid var(--ink);font-size:14px;color:var(--ink-soft);}
+  .meta b{color:var(--ink);font-weight:600;margin-left:6px;}
+  .meta a{color:var(--ink);}
+
+  .road{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-top:34px;}
+  .road div{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:10px 8px;
+    font-size:13px;text-align:center;color:var(--ink-soft);}
+  .road div b{display:block;font-size:15px;color:var(--ink);margin-top:2px;}
+  .road div.now{background:var(--ink);color:#CFCDCA;border-color:var(--ink);}
+  .road div.now b{color:#fff;}
+
+  section{margin-top:44px;}
+  h2{font-size:14px;font-weight:700;letter-spacing:.04em;color:var(--ink-soft);margin:0 0 14px;
+    display:flex;align-items:center;gap:10px;}
+  h2 .when{font-size:12px;font-weight:600;background:var(--sand);color:var(--ink);padding:2px 8px;border-radius:5px;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:24px 26px;}
+  .big{font-size:24px;font-weight:600;line-height:1.45;letter-spacing:-0.01em;}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .chip{display:inline-block;background:var(--paper);border:1px solid var(--line);border-radius:999px;
+    padding:6px 14px;font-size:15px;margin:4px 6px 0 0;}
+
+  .shift{display:grid;grid-template-columns:1fr 40px 1fr;align-items:stretch;gap:8px;}
+  .shift .arrow{display:flex;align-items:center;justify-content:center;font-size:24px;color:var(--ink-faint);}
+  .shift .tag{font-size:13px;font-weight:600;color:var(--ink-soft);}
+  .shift .card.new{border:2px solid var(--ink);}
+  .shift .name{font-size:22px;font-weight:700;margin-top:6px;}
+  .shift .desc{font-size:16px;color:var(--ink-soft);margin-top:8px;}
+
+  ol.flow{list-style:none;margin:0;padding:0;counter-reset:f;}
+  ol.flow li{counter-increment:f;display:grid;grid-template-columns:44px 1fr;gap:12px;padding:14px 0;
+    border-top:1px solid var(--rule);font-size:17px;}
+  ol.flow li:first-child{border-top:2px solid var(--ink);}
+  ol.flow li::before{content:counter(f);font-size:22px;font-weight:700;color:var(--ink-faint);}
+
+  table{width:100%;border-collapse:collapse;font-size:16px;}
+  th{text-align:left;font-size:13px;color:var(--ink-soft);font-weight:600;padding:0 12px 10px 0;border-bottom:2px solid var(--ink);}
+  td{padding:12px 12px 12px 0;border-bottom:1px solid var(--rule);vertical-align:top;}
+  td:first-child{font-weight:600;}
+
+  .goal{display:grid;grid-template-columns:36px 1fr;gap:12px;align-items:start;padding:16px 0;border-top:1px solid var(--rule);}
+  .goal:first-of-type{border-top:2px solid var(--ink);}
+  .goal .box{width:26px;height:26px;border:2px solid var(--ink);border-radius:6px;margin-top:2px;}
+  .goal p{margin:0;font-size:18px;font-weight:500;}
+  .due{display:inline-block;background:var(--hl);font-weight:700;font-size:14px;padding:3px 10px;border-radius:6px;margin-bottom:10px;}
+
+  ul.later{list-style:none;margin:0;padding:0;}
+  ul.later li{padding:12px 0;border-top:1px solid var(--rule);font-size:16px;}
+  ul.later li:first-child{border-top:2px solid var(--ink);}
+  ul.later li span{color:var(--ink-soft);}
+
+  .unknown{background:var(--ink);color:#EDEDEA;border-radius:12px;padding:22px 26px;}
+  .unknown h2{color:var(--sand);}
+  .unknown ul{margin:0;padding-left:20px;}
+  .unknown li{margin:6px 0;font-size:16px;}
+
+  footer{margin-top:56px;padding-top:18px;border-top:1px solid var(--rule);font-size:13px;color:var(--ink-faint);}
+
+  @media (max-width:640px){
+    h1{font-size:32px;} .lead{font-size:18px;}
+    .two,.shift{grid-template-columns:1fr;} .shift .arrow{transform:rotate(90deg);height:28px;}
+    .road{grid-template-columns:repeat(4,1fr);}
+  }
+  @page{size:A4;margin:12mm;}
+  @media print{
+    *{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    body{background:#fff;} .wrap{padding:0;max-width:none;}
+    section,.card,.goal,ol.flow li{break-inside:avoid;}
+    .road{grid-template-columns:repeat(7,1fr);} .two,.shift{grid-template-columns:1fr 1fr;} .shift{grid-template-columns:1fr 40px 1fr;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- 머리 · 한 줄 소개 칸 -->
+  <div class="kicker">PRD · 서비스 기획안</div>
+  <h1>내 지역 학교 커리큘럼</h1>
+  <p class="lead">매주 수업 계획을 세우는 학원 강사를 위해, 담당 지역 학교들의 교육과정을 <b>접속하자마자 바로 모아볼 수 있게</b> 해 준다.</p>
+  <div class="meta">
+    <span>작성<b>2026-09-29 · 4회차</b></span>
+    <span>갈 길<b>B 대시보드 키우기</b></span>
+    <span>이번에 만들 기능<b>지역 필터 선택 및 기본 지역 저장</b></span>
+  </div>
+
+  <!-- 10주 중 이 기획안을 다시 쓰는 회차 -->
+  <div class="road">
+    <div class="now">4회차<b>기획안</b></div>
+    <div>5회차<b>기능 만들기</b></div>
+    <div>6회차<b>저장</b></div>
+    <div>7회차<b>기록</b></div>
+    <div>8회차<b>검증</b></div>
+    <div>9회차<b>개선</b></div>
+    <div>10회차<b>발표</b></div>
+  </div>
+
+  <!-- 문제 · 대상 -->
+  <section>
+    <div class="two">
+      <div>
+        <h2>문제</h2>
+        <div class="card big">특정 지역 학원에서 교육과정을 연구하는 학원 강사가 매주 수업 계획을 세울 때, 매번 전체 지역과 학교를 다시 찾아야 해서 담당 지역 학교들의 교육과정을 바로 확인하기 어렵다.</div>
+      </div>
+      <div>
+        <h2>대상</h2>
+        <div class="card">
+          <div style="font-size:18px;font-weight:600;">담당 지역 학교들의 교육과정을 매주 찾아보고 수업 계획에 반영하는 학원 강사</div>
+          <span class="chip">학원 강사</span>
+          <span class="chip">교육과정 연구</span>
+          <span class="chip">매주 계획 수립</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 출발점 → 이번에 만들 기능 -->
+  <section>
+    <h2>3회차 출발점에서 이번에 만들 기능으로 <span class="when">5회차</span></h2>
+    <div class="shift">
+      <div class="card">
+        <div class="tag">출발점 · 3회차</div>
+        <div class="desc" style="color:var(--ink);font-size:17px;">전국 학교 및 교육청 교육과정 대시보드</div>
+        <div class="desc" style="margin-top:12px;font-weight:600;color:var(--ink);">아쉬웠던 점</div>
+        <div class="desc">· 내가 근무하는 지역의 학교 위주로 커리큘럼을 볼 수 없음</div>
+        <div class="desc">· 지역을 고를 수 있으면 좋겠음</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="card new">
+        <div class="tag">이번에 만들 기능</div>
+        <div class="name">지역 필터 선택 및 기본 지역 저장</div>
+        <div class="desc">지역(시/도, 시/군/구)을 선택해 "내 지역 저장"을 누르면 접속 시 해당 지역 학교 커리큘럼이 첫 화면에 자동 노출되는 기능</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 동작 순서 -->
+  <section>
+    <h2>동작 순서 · 보이는 것, 누르는 것, 생기는 것</h2>
+    <ol class="flow">
+      <li>사용자가 화면 상단의 "지역 선택" 드롭다운 목록(시/도, 시/군/구)을 본다</li>
+      <li>원하는 지역(예: 서울시 강남구)을 고르고 "내 지역으로 저장" 버튼을 누른다</li>
+      <li>화면에 "내 지역으로 저장되었습니다" 안내 문구가 뜨고, 해당 지역 학교들의 교육과정 목록만 화면에 나타난다</li>
+      <li>브라우저를 새로고침하거나 다시 접속해도 내가 저장한 지역의 학교 교육과정이 첫 화면에 바로 보인다</li>
+      <li>다른 지역을 보고 싶을 때는 언제든 드롭다운을 다시 고르고 "지역 변경" 또는 "필터 해제"를 누른다</li>
+    </ol>
+  </section>
+
+  <!-- 저장할 것 · 기록할 행동 -->
+  <section>
+    <div class="two">
+      <div>
+        <h2>저장할 것 <span class="when">6회차</span></h2>
+        <div class="card">
+          <table>
+            <thead><tr><th>항목</th><th>예</th></tr></thead>
+            <tbody>
+              <tr><td>기본 시/도</td><td>서울특별시</td></tr>
+              <tr><td>기본 시/군/구</td><td>강남구</td></tr>
+              <tr><td>설정 저장 일시</td><td>2026-09-29 14:00</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div>
+        <h2>기록할 행동 <span class="when">7회차</span></h2>
+        <div class="card">
+          <table>
+            <thead><tr><th>행동</th><th>언제 1번으로 세나</th></tr></thead>
+            <tbody>
+              <tr><td>"내 지역으로 저장" 누름</td><td>"내 지역으로 저장" 버튼을 누를 때 1번</td></tr>
+              <tr><td>"지역 변경/해제" 누름</td><td>"필터 해제" 또는 "지역 변경"을 누를 때 1번</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 성공 기준 -->
+  <section>
+    <h2>성공 기준 <span class="when">8회차</span></h2>
+    <div class="card">
+      <div class="due">기한 · 10월 4일 5회차 수업 끝</div>
+      <div class="goal"><div class="box"></div><p>내가 브라우저에서 지역을 고르고 "내 지역으로 저장"을 누른 뒤, 새로고침해도 해당 지역 학교 교육과정 목록이 3초 안에 유지되어 뜬다</p></div>
+      <div class="goal"><div class="box"></div><p>내가 브라우저를 완전히 닫았다가 다시 열었을 때, 마지막으로 저장한 지역 필터가 적용된 화면을 3초 안에 본다</p></div>
+    </div>
+  </section>
+
+  <!-- 나중에 -->
+  <section>
+    <h2>나중에 · 지금은 안 만듦 <span class="when">9회차</span></h2>
+    <ul class="later">
+      <li><b>관심 학교 북마크 기능</b> <span>· 5회차 실습 1시간 범위 집중을 위해 지역 필터 저장 기능 완성 후 개발</span></li>
+      <li><b>교육청 기준과 학교 커리큘럼 1:1 비교 보기</b> <span>· 추후 기능 고도화 시 추가</span></li>
+      <li><b>강사 계정 로그인 및 기기 간 동기화</b> <span>· 6회차 데이터베이스 연동 시 구현</span></li>
+    </ul>
+  </section>
+
+  <!-- 아직 모르는 것 -->
+  <section class="unknown">
+    <h2>아직 모르는 것 · 5회차에 다시 묻기</h2>
+    <ul>
+      <li>없음</li>
+    </ul>
+  </section>
+
+  <footer>
+    이 기획안의 원본은 docs/02-PRD.md 입니다. 클로드는 원본을 읽고 만듭니다. 고칠 때는 원본을 고치고 기획안을 다시 만듭니다.
+  </footer>
+</div>
+</body>
+</html>
