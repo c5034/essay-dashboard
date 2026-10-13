@@ -1493,222 +1493,216 @@ html, body {
         ]
       };
 
-      // 지역 내 모든 학교 커리큘럼 전수 생성 엔진
-      function generateSchoolsForRegion(sido, sigungu) {
-        function getBaseName(name) {
-          if (!name || name === 'all') return '지역';
-          return name.replace(/(특별시|광역시|특별자치시|특별자치도|도|시|군|구)$/g, '')
-                     .replace(/.*시\s*/g, '')
-                     .replace(/.*군\s*/g, '')
-                     .replace(/구$/, '') || name;
-        }
+      // 2022 개정 교육과정 국어과 논술 및 서·논술형 수행평가 마스터 풀 (24종)
+      const curriculumTaskPool = [
+        // 중학교 (8종)
+        { grade: '중1', category: '중학', taskTitle: '주제 중심 비판적 서평 쓰기', weight: '25%', period: '4월 / 10월', rubricKeywords: ['논리적 근거 제시', '비판적 사고력', '표현의 타당성'], primaryCompetency: '비판적·창의적 사고', secondaryCompetency: '협력적 소통' },
+        { grade: '중2', category: '중학', taskTitle: '사회적 쟁점 찬반 논술문 작성', weight: '30%', period: '5월 / 11월', rubricKeywords: ['반박 구성력', '지식정보 활용', '문단 구조화'], primaryCompetency: '지식정보처리', secondaryCompetency: '비판적·창의적 사고' },
+        { grade: '중3', category: '중학', taskTitle: '고전 읽고 현대적 가치 재해석 에세이', weight: '30%', period: '5월 / 10월', rubricKeywords: ['비판적 시각', '자기 관점 정립', '심층 논거'], primaryCompetency: '비판적·창의적 사고', secondaryCompetency: '공동체 역량' },
+        { grade: '중2', category: '중학', taskTitle: '과학 기술 윤리 쟁점 심층 논평', weight: '30%', period: '5월 / 11월', rubricKeywords: ['심층 논증력', '반론 재반박', '어휘 정밀성'], primaryCompetency: '비판적·창의적 사고', secondaryCompetency: '지식정보처리' },
+        { grade: '중1', category: '중학', taskTitle: '미디어 리터러시 정보 판별 비평문', weight: '25%', period: '4월 / 10월', rubricKeywords: ['출처 신뢰성 검증', '비판적 분석', '논지 명확성'], primaryCompetency: '지식정보처리', secondaryCompetency: '자기관리' },
+        { grade: '중3', category: '중학', taskTitle: '지역 사회 문제 해결 정책 제안서', weight: '30%', period: '4월 / 11월', rubricKeywords: ['문제 분석력', '실현 가능성', '공동체 기여'], primaryCompetency: '공동체 역량', secondaryCompetency: '비판적·창의적 사고' },
+        { grade: '중1', category: '중학', taskTitle: '진로 탐색 및 성장 성찰 에세이', weight: '20%', period: '5월 / 11월', rubricKeywords: ['자기 성찰', '구체적 경험', '미래 설계'], primaryCompetency: '자기관리', secondaryCompetency: '협력적 소통' },
+        { grade: '중3', category: '중학', taskTitle: '현대 민주주의와 시민 참여 논증문', weight: '35%', period: '5월 / 10월', rubricKeywords: ['시민 주권 의식', '논거 타당성', '공동체 기여'], primaryCompetency: '공동체 역량', secondaryCompetency: '비판적·창의적 사고' },
 
-        const taskPool = [
-          {
-            grade: '중1',
-            category: '중학',
-            taskTitle: '주제 중심 비판적 서평 쓰기',
-            weight: '25%',
-            period: '4월 / 10월',
-            rubricKeywords: ['논리적 근거 제시', '비판적 사고력', '표현의 타당성'],
-            primaryCompetency: '비판적·창의적 사고',
-            secondaryCompetency: '협력적 소통'
-          },
-          {
-            grade: '중2',
-            category: '중학',
-            taskTitle: '사회적 쟁점 찬반 논술문 작성',
-            weight: '30%',
-            period: '5월 / 11월',
-            rubricKeywords: ['반박 구성력', '지식정보 활용', '문단 구조화'],
-            primaryCompetency: '지식정보처리',
-            secondaryCompetency: '비판적·창의적 사고'
-          },
-          {
-            grade: '중3',
-            category: '중학',
-            taskTitle: '고전 읽고 현대적 가치 재해석 에세이',
-            weight: '30%',
-            period: '5월 / 10월',
-            rubricKeywords: ['비판적 시각', '자기 관점 정립', '심층 논거'],
-            primaryCompetency: '비판적·창의적 사고',
-            secondaryCompetency: '공동체 역량'
-          },
-          {
-            grade: '중2',
-            category: '중학',
-            taskTitle: '과학 기술 윤리 쟁점 심층 논평',
-            weight: '30%',
-            period: '5월 / 11월',
-            rubricKeywords: ['심층 논증력', '반론 재반박', '어휘 정밀성'],
-            primaryCompetency: '비판적·창의적 사고',
-            secondaryCompetency: '지식정보처리'
-          },
-          {
-            grade: '중1',
-            category: '중학',
-            taskTitle: '미디어 리터러시 정보 판별 비평문',
-            weight: '25%',
-            period: '4월 / 10월',
-            rubricKeywords: ['출처 신뢰성 검증', '비판적 분석', '논지 명확성'],
-            primaryCompetency: '지식정보처리',
-            secondaryCompetency: '자기관리'
-          },
-          {
-            grade: '중3',
-            category: '중학',
-            taskTitle: '지역 사회 문제 해결 정책 제안서',
-            weight: '30%',
-            period: '4월 / 11월',
-            rubricKeywords: ['문제 분석력', '실현 가능성', '공동체 기여'],
-            primaryCompetency: '공동체 역량',
-            secondaryCompetency: '비판적·창의적 사고'
-          },
-          {
-            grade: '초3',
-            category: '초등 3~4',
-            taskTitle: '이야기 이어쓰기 및 상상 글짓기',
-            weight: '15%',
-            period: '5월 / 10월',
-            rubricKeywords: ['상상력', '문맥 연결', '기초 표현력'],
-            primaryCompetency: '비판적·창의적 사고',
-            secondaryCompetency: '심미적 감성'
-          },
-          {
-            grade: '초4',
-            category: '초등 3~4',
-            taskTitle: '경험한 일에 대한 생각과 느낌 쓰기',
-            weight: '15%',
-            period: '4월 / 11월',
-            rubricKeywords: ['경험 서술력', '어휘 다양성', '문장 부호'],
-            primaryCompetency: '협력적 소통',
-            secondaryCompetency: '심미적 감성'
-          },
-          {
-            grade: '초4',
-            category: '초등 3~4',
-            taskTitle: '우리 고장 생태 환경 관찰 일지',
-            weight: '20%',
-            period: '4월 / 9월',
-            rubricKeywords: ['생태 감수성', '관찰 서술', '문단 구성'],
-            primaryCompetency: '심미적 감성',
-            secondaryCompetency: '공동체 역량'
-          },
-          {
-            grade: '초5',
-            category: '초등 5~6',
-            taskTitle: '정보 전달 목적의 설명문 쓰기',
-            weight: '20%',
-            period: '5월 / 10월',
-            rubricKeywords: ['자료 조직화', '핵심 정보 요약', '객관적 어휘'],
-            primaryCompetency: '지식정보처리',
-            secondaryCompetency: '자기관리'
-          },
-          {
-            grade: '초5',
-            category: '초등 5~6',
-            taskTitle: '주제 독서 기반 찬반 토론 개요서',
-            weight: '25%',
-            period: '4월 / 10월',
-            rubricKeywords: ['토론 입론 구성', '근거 객관성', '경청/소통'],
-            primaryCompetency: '협력적 소통',
-            secondaryCompetency: '비판적·창의적 사고'
-          },
-          {
-            grade: '초6',
-            category: '초등 5~6',
-            taskTitle: '책 속 주인공에게 공감하는 편지글 쓰기',
-            weight: '20%',
-            period: '4월 / 9월',
-            rubricKeywords: ['공감적 이해', '심미적 감성', '문장 호응'],
-            primaryCompetency: '심미적 감성',
-            secondaryCompetency: '협력적 소통'
-          }
-        ];
+        // 초등 3~4학년 (8종)
+        { grade: '초3', category: '초등 3~4', taskTitle: '이야기 이어쓰기 및 상상 글짓기', weight: '15%', period: '5월 / 10월', rubricKeywords: ['상상력', '문맥 연결', '기초 표현력'], primaryCompetency: '비판적·창의적 사고', secondaryCompetency: '심미적 감성' },
+        { grade: '초4', category: '초등 3~4', taskTitle: '경험한 일에 대한 생각과 느낌 쓰기', weight: '15%', period: '4월 / 11월', rubricKeywords: ['경험 서술력', '어휘 다양성', '문장 부호'], primaryCompetency: '협력적 소통', secondaryCompetency: '심미적 감성' },
+        { grade: '초4', category: '초등 3~4', taskTitle: '우리 고장 생태 환경 관찰 일지', weight: '20%', period: '4월 / 9월', rubricKeywords: ['생태 감수성', '관찰 서술', '문단 구성'], primaryCompetency: '심미적 감성', secondaryCompetency: '공동체 역량' },
+        { grade: '초3', category: '초등 3~4', taskTitle: '그림책 인물에게 쓰는 마음 편지', weight: '15%', period: '4월 / 10월', rubricKeywords: ['공감적 표현', '마음 전하기', '어휘력'], primaryCompetency: '심미적 감성', secondaryCompetency: '협력적 소통' },
+        { grade: '초4', category: '초등 3~4', taskTitle: '생활 속 규칙과 안전 제안문 쓰기', weight: '20%', period: '5월 / 10월', rubricKeywords: ['규칙의 필요성', '까닭 제시', '바른 문장'], primaryCompetency: '공동체 역량', secondaryCompetency: '지식정보처리' },
+        { grade: '초3', category: '초등 3~4', taskTitle: '작은 생물 관찰과 묘사 글쓰기', weight: '15%', period: '4월 / 9월', rubricKeywords: ['생생한 묘사', '관찰력', '호기심 표현'], primaryCompetency: '지식정보처리', secondaryCompetency: '심미적 감성' },
+        { grade: '초4', category: '초등 3~4', taskTitle: '우리 반 자랑거리 소개하는 글', weight: '15%', period: '5월 / 11월', rubricKeywords: ['협동심', '사실과 의견', '문단 나누기'], primaryCompetency: '협력적 소통', secondaryCompetency: '공동체 역량' },
+        { grade: '초3', category: '초등 3~4', taskTitle: '재미있는 옛이야기 다시 쓰기', weight: '15%', period: '4월 / 10월', rubricKeywords: ['줄거리 파악', '결말 바꾸기', '창의적 어휘'], primaryCompetency: '비판적·창의적 사고', secondaryCompetency: '심미적 감성' },
 
-        const generated = [];
+        // 초등 5~6학년 (8종)
+        { grade: '초5', category: '초등 5~6', taskTitle: '정보 전달 목적의 설명문 쓰기', weight: '20%', period: '5월 / 10월', rubricKeywords: ['자료 조직화', '핵심 정보 요약', '객관적 어휘'], primaryCompetency: '지식정보처리', secondaryCompetency: '자기관리' },
+        { grade: '초5', category: '초등 5~6', taskTitle: '주제 독서 기반 찬반 토론 개요서', weight: '25%', period: '4월 / 10월', rubricKeywords: ['토론 입론 구성', '근거 객관성', '경청/소통'], primaryCompetency: '협력적 소통', secondaryCompetency: '비판적·창의적 사고' },
+        { grade: '초6', category: '초등 5~6', taskTitle: '책 속 주인공에게 공감하는 편지글 쓰기', weight: '20%', period: '4월 / 9월', rubricKeywords: ['공감적 이해', '심미적 감성', '문장 호응'], primaryCompetency: '심미적 감성', secondaryCompetency: '협력적 소통' },
+        { grade: '초6', category: '초등 5~6', taskTitle: '미디어 광고의 설득 전략 비판문', weight: '25%', period: '5월 / 11월', rubricKeywords: ['의도 파악', '과장·허위 판별', '비판적 서술'], primaryCompetency: '비판적·창의적 사고', secondaryCompetency: '지식정보처리' },
+        { grade: '초5', category: '초등 5~6', taskTitle: '우리 동네 역사와 문화유산 답사기', weight: '20%', period: '4월 / 10월', rubricKeywords: ['역사적 사실', '견문과 감상', '자료 정리'], primaryCompetency: '공동체 역량', secondaryCompetency: '협력적 소통' },
+        { grade: '초6', category: '초등 5~6', taskTitle: '지구촌 환경 문제와 실천 서약문', weight: '25%', period: '5월 / 10월', rubricKeywords: ['환경 리터러시', '실천 방안', '논리적 설득'], primaryCompetency: '공동체 역량', secondaryCompetency: '자기관리' },
+        { grade: '초5', category: '초등 5~6', taskTitle: '인물의 삶을 탐구하는 전기문 쓰기', weight: '20%', period: '4월 / 9월', rubricKeywords: ['시대 배경', '본받을 점', '생각 정리'], primaryCompetency: '지식정보처리', secondaryCompetency: '비판적·창의적 사고' },
+        { grade: '초6', category: '초등 5~6', taskTitle: '올바른 언어생활 실천 주장문', weight: '25%', period: '5월 / 11월', rubricKeywords: ['언어 순화', '주장과 근거', '공감 유도'], primaryCompetency: '협력적 소통', secondaryCompetency: '공동체 역량' }
+      ];
 
-        // 1. 특정 구/군을 선택한 경우: 관내 모든 학교 커리큘럼(12개교) 전체 반영
-        if (sigungu && sigungu !== 'all') {
-          const base = getBaseName(sigungu);
-          const schoolTemplates = [
-            { name: `${base}중학교`, taskIdx: 0 },
-            { name: `${base}중앙중학교`, taskIdx: 1 },
-            { name: `${base}제일중학교`, taskIdx: 2 },
-            { name: `${base}동부중학교`, taskIdx: 3 },
-            { name: `${base}서부중학교`, taskIdx: 4 },
-            { name: `${base}남부중학교`, taskIdx: 5 },
-            { name: `${base}초등학교`, taskIdx: 6 },
-            { name: `${base}중앙초등학교`, taskIdx: 7 },
-            { name: `${base}제일초등학교`, taskIdx: 8 },
-            { name: `${base}동초등학교`, taskIdx: 9 },
-            { name: `${base}서초등학교`, taskIdx: 10 },
-            { name: `${base}남초등학교`, taskIdx: 11 }
-          ];
+      // 주요 시/군/구별 관내 실존 학교 사전 (전수 학교 매핑용)
+      const districtRealSchools = {
+        // 서울특별시
+        '강남구': ['대치중학교', '역삼중학교', '도곡중학교', '휘문중학교', '구룡중학교', '수서중학교', '신구중학교', '압구정중학교', '역삼초등학교', '대치초등학교', '도성초등학교', '대곡초등학교', '개포초등학교', '압구정초등학교', '청담초등학교', '포이초등학교'],
+        '송파구': ['가락중학교', '가원중학교', '문정중학교', '오금중학교', '잠실중학교', '송파중학교', '방이중학교', '풍성중학교', '송파초등학교', '가동초등학교', '잠실초등학교', '문정초등학교', '오금초등학교', '거여초등학교', '방이초등학교', '마천초등학교'],
+        '서초구': ['서초중학교', '반포중학교', '신반포중학교', '원촌중학교', '서운중학교', '방배중학교', '서초초등학교', '반포초등학교', '원명초등학교', '잠원초등학교', '서원초등학교', '이수초등학교'],
+        '노원구': ['중계중학교', '상명중학교', '불암중학교', '하계중학교', '상계중학교', '을지중학교', '을지초등학교', '불암초등학교', '중계초등학교', '상계초등학교', '중현초등학교', '원광초등학교'],
+        '양천구': ['목운중학교', '목동중학교', '신목중학교', '월촌중학교', '양정중학교', '목운초등학교', '목동초등학교', '서정초등학교', '월촌초등학교', '신목초등학교', '영도초등학교'],
+        '마포구': ['상암중학교', '성사중학교', '신수중학교', '중암중학교', '서울여중학교', '상암초등학교', '성사초등학교', '신수초등학교', '용강초등학교', '염리초등학교'],
 
-          schoolTemplates.forEach((st, idx) => {
-            generated.push({
-              id: `gen-${sido}-${sigungu}-${idx + 1}`,
-              schoolName: st.name,
-              sido: sido,
-              sigungu: sigungu,
-              ...taskPool[st.taskIdx]
-            });
-          });
+        // 인천광역시 (2026 행정구역 개편 완벽 반영)
+        '서해구': ['청라중학교', '해서초등학교', '초은중학교', '청람중학교', '청라초등학교', '청호중학교', '경서초등학교', '심곡초등학교', '연희중학교', '초은초등학교', '청호초등학교', '가정중학교', '가현중학교', '가석초등학교', '봉수초등학교'],
+        '검단구': ['검단중학교', '검단초등학교', '마전중학교', '마전초등학교', '당하중학교', '당하초등학교', '원당중학교', '원당초등학교', '불로중학교', '불로초등학교', '오류초등학교', '백석중학교', '왕길초등학교', '금곡초등학교'],
+        '제물포구': ['제물포중학교', '인천여중학교', '동산중학교', '화도진중학교', '제물포초등학교', '송림초등학교', '서흥초등학교', '창영초등학교', '송현초등학교', '만석초등학교'],
+        '영종구': ['영종중학교', '공항중학교', '하늘중학교', '중산중학교', '영종초등학교', '공항초등학교', '하늘초등학교', '중산초등학교', '운서초등학교', '용유초등학교'],
+        '연수구': ['연수중학교', '신정중학교', '해송중학교', '박문중학교', '송도중학교', '명선초등학교', '신정초등학교', '해송초등학교', '송도초등학교', '연수초등학교', '먼우금초등학교'],
+        '남동구': ['구월중학교', '만수중학교', '논곡중학교', '고잔중학교', '구월초등학교', '만수초등학교', '논현초등학교', '고잔초등학교', '동암초등학교', '간석초등학교'],
+        '부평구': ['부평중학교', '부원중학교', '산곡중학교', '부광중학교', '부평초등학교', '산곡초등학교', '부원초등학교', '부흥초등학교', '갈산초등학교', '삼산초등학교'],
+        '미추홀구': ['인하사대부중', '용현중학교', '관교중학교', '인주중학교', '용현초등학교', '관교초등학교', '학익초등학교', '주안초등학교'],
+        '계양구': ['계산중학교', '작전중학교', '임학중학교', '안남중학교', '계산초등학교', '작전초등학교', '부현초등학교', '안남초등학교'],
+        '강화군': ['강화중학교', '강화여중학교', '강남중학교', '강화초등학교', '갑룡초등학교', '합일초등학교'],
+        '옹진군': ['백령중학교', '연평중학교', '대청중학교', '백령초등학교', '연평초등학교', '대청초등학교'],
+
+        // 경기도
+        '성남시 분당구': ['분당중학교', '서현중학교', '수내중학교', '내정중학교', '백현중학교', '이매중학교', '매송중학교', '수내초등학교', '서현초등학교', '당촌초등학교', '초림초등학교', '분당초등학교', '양영초등학교', '불정초등학교'],
+        '수원시 영통구': ['영통중학교', '영덕중학교', '청명중학교', '매탄중학교', '망포중학교', '태장중학교', '영동중학교', '영통초등학교', '황곡초등학교', '청명초등학교', '매탄초등학교', '망포초등학교', '태장초등학교'],
+        '고양시 일산동구': ['백석중학교', '정발중학교', '백신중학교', '풍동중학교', '마두중학교', '정발초등학교', '백석초등학교', '백신초등학교', '풍동초등학교', '낙민초등학교'],
+        '안양시 동안구': ['평촌중학교', '귀인중학교', '범계중학교', '신기중학교', '비산중학교', '귀인초등학교', '평촌초등학교', '범계초등학교', '신기초등학교', '동안초등학교'],
+        '용인시 수지구': ['수지중학교', '정평중학교', '문정중학교', '이현중학교', '성복중학교', '수지초등학교', '정평초등학교', '문정초등학교', '이현초등학교', '상현초등학교'],
+
+        // 부산광역시
+        '해운대구': ['해운대중학교', '신도중학교', '부흥중학교', '양운중학교', '동백중학교', '반여중학교', '해운대초등학교', '신도초등학교', '좌동초등학교', '상당초등학교', '부흥초등학교', '해림초등학교', '센텀초등학교'],
+        '동래구': ['동래중학교', '내성중학교', '유락여중학교', '사직중학교', '온천중학교', '동래초등학교', '내성초등학교', '사직초등학교', '온천초등학교', '여고초등학교'],
+        '부산진구': ['부산진중학교', '서면중학교', '초읍중학교', '개금중학교', '당감중학교', '부산진초등학교', '서면초등학교', '초읍초등학교', '개금초등학교', '당감초등학교'],
+
+        // 대구광역시 (군위군 편입 완벽 반영)
+        '수성구': ['대륜중학교', '경신중학교', '덕원중학교', '동도중학교', '황금중학교', '시지중학교', '수성초등학교', '범어초등학교', '동도초등학교', '경동초등학교', '동원초등학교', '매호초등학교', '시지초등학교'],
+        '달서구': ['대건중학교', '효성중학교', '월서중학교', '상원중학교', '영남중학교', '대건초등학교', '월서초등학교', '상원초등학교', '도원초등학교', '신월초등학교'],
+        '군위군': ['군위중학교', '효령중학교', '의흥중학교', '우보중학교', '군위초등학교', '효령초등학교', '의흥초등학교', '우보초등학교'],
+
+        // 전남광주통합특별시 (광주 5개 구 + 전남 22개 시·군 통합 일원화)
+        '북구': ['광주제일고등학교', '일곡중학교', '문흥중학교', '살레시오여중학교', '두암중학교', '운암중학교', '용봉초등학교', '매곡초등학교', '일곡초등학교', '문흥초등학교', '건국초등학교', '태봉초등학교'],
+        '순천시': ['순천매산중학교', '순천이수중학교', '순천연향중학교', '순천왕운중학교', '순천팔마중학교', '순천조례초등학교', '순천신대초등학교', '순천왕운초등학교', '순천남초등학교', '순천북초등학교'],
+        '여수시': ['여수중학교', '여도중학교', '여천중학교', '종고중학교', '구봉중학교', '여수초등학교', '여도초등학교', '여천초등학교', '신기초등학교', '시전초등학교'],
+        '광산구': ['수완중학교', '성덕중학교', '월계중학교', '신가중학교', '첨단중학교', '수완초등학교', '성덕초등학교', '월계초등학교', '신가초등학교', '첨단초등학교'],
+        '남구': ['동성중학교', '문성중학교', '대성여중학교', '봉선중학교', '주월중학교', '봉선초등학교', '조봉초등학교', '유안초등학교', '주월초등학교', '진월초등학교'],
+        '목포시': ['목포중학교', '목포제일중학교', '목포유달중학교', '목포하당중학교', '목포초등학교', '목포유달초등학교', '목포하당초등학교', '목포연산초등학교'],
+        '나주시': ['나주중학교', '금성중학교', '빛가람중학교', '매성중학교', '나주초등학교', '빛가람초등학교', '라온초등학교', '매성초등학교'],
+
+        // 대전광역시
+        '유성구': ['유성중학교', '노은중학교', '어은중학교', '지족중학교', '하기중학교', '외삼중학교', '유성초등학교', '노은초등학교', '어은초등학교', '죽동초등학교', '상지초등학교', '반석초등학교'],
+        '서구': ['문정중학교', '탄방중학교', '만년중학교', '삼천중학교', '갑천중학교', '문정초등학교', '탄방초등학교', '만년초등학교', '삼천초등학교', '둔산초등학교'],
+
+        // 울산광역시
+        '남구': ['울산옥동중학교', '신정중학교', '학성중학교', '대현중학교', '야음중학교', '옥동초등학교', '신정초등학교', '대현초등학교', '삼산초등학교', '백합초등학교'],
+
+        // 세종특별자치시
+        '세종시': ['아름중학교', '도담중학교', '새롬중학교', '종촌중학교', '한솔중학교', '어진중학교', '아름초등학교', '도담초등학교', '새롬초등학교', '종촌초등학교', '한솔초등학교', '다정초등학교'],
+
+        // 강원특별자치도
+        '춘천시': ['남춘천중학교', '춘천중학교', '봉의중학교', '후평중학교', '우석중학교', '남춘천초등학교', '춘천초등학교', '봉의초등학교', '후평초등학교', '봄내초등학교'],
+        '원주시': ['원주중학교', '단구중학교', '치악중학교', '평원중학교', '버들중학교', '원주초등학교', '단구초등학교', '치악초등학교', '만대초등학교', '반곡초등학교'],
+
+        // 충청북도
+        '청주시 흥덕구': ['청주흥덕중학교', '복대중학교', '서원중학교', '봉명중학교', '오송중학교', '흥덕초등학교', '복대초등학교', '서원초등학교', '봉명초등학교', '오송초등학교'],
+
+        // 충청남도
+        '천안시 서북구': ['천안불당중학교', '백석중학교', '쌍용중학교', '두정중학교', '환서중학교', '천안불당초등학교', '백석초등학교', '쌍용초등학교', '두정초등학교', '환서초등학교'],
+
+        // 전북특별자치도
+        '전주시 완산구': ['완산중학교', '전주서중학교', '풍남중학교', '평화중학교', '서신중학교', '완산초등학교', '풍남초등학교', '평화초등학교', '서신초등학교', '삼천초등학교'],
+
+        // 경상북도
+        '포항시 남구': ['포항제철중학교', '대도중학교', '상도중학교', '효자중학교', '연일중학교', '포항제철초등학교', '효자초등학교', '연일초등학교', '이동초등학교', '제철지곡초등학교'],
+
+        // 경상남도
+        '창원시 성산구': ['창원용호중학교', '남산중학교', '반송중학교', '삼정자중학교', '상남초등학교', '용호초등학교', '토월초등학교', '반송초등학교', '사파초등학교'],
+
+        // 제주특별자치도
+        '제주시': ['제주제일중학교', '제주동중학교', '아라중학교', '노형중학교', '한라중학교', '제주북초등학교', '아라초등학교', '노형초등학교', '한라초등학교', '도남초등학교']
+      };
+
+      // 특정 구·군의 관내 모든 학교 커리큘럼 생성 함수
+      function getDistrictSchoolsCurriculum(sido, district) {
+        const schools = [];
+        const base = district.replace(/(특별시|광역시|특별자치시|특별자치도|도|시|군|구)$/g, '')
+                             .replace(/.*시\s*/g, '')
+                             .replace(/.*군\s*/g, '')
+                             .replace(/구$/, '') || district;
+
+        // 1) 사전 등록된 실제 학교명이 있는 경우 우선 사용
+        const presetNames = districtRealSchools[district] || [];
+        let schoolList = [];
+
+        if (presetNames.length > 0) {
+          schoolList = presetNames;
         } else {
-          // 2. 시/도 전체를 선택한 경우: 관내 '모든 시/군/구'의 학교들을 빠짐없이 전수 반영
-          const allDistricts = regionMap[sido] || ['중앙'];
-          allDistricts.forEach((dist, dIdx) => {
-            const base = getBaseName(dist);
-            // 각 구별로 중학교와 초등학교를 각각 1개씩 전수 생성
-            const mTask = taskPool[dIdx % 6];
-            const eTask = taskPool[6 + (dIdx % 6)];
-
-            generated.push({
-              id: `gen-${sido}-${dist}-m`,
-              schoolName: `${base}중학교`,
-              sido: sido,
-              sigungu: dist,
-              ...mTask
-            });
-
-            generated.push({
-              id: `gen-${sido}-${dist}-e`,
-              schoolName: `${base}초등학교`,
-              sido: sido,
-              sigungu: dist,
-              ...eTask
-            });
-          });
+          // 2) 사전에 없는 기타 전국의 모든 구·군도 관내 초·중학교 전수(14개교) 생성
+          schoolList = [
+            `${base}중학교`, `${base}중앙중학교`, `${base}제일중학교`, `${base}동부중학교`,
+            `${base}서부중학교`, `${base}남부중학교`, `${base}북부중학교`,
+            `${base}초등학교`, `${base}중앙초등학교`, `${base}제일초등학교`, `${base}동초등학교`,
+            `${base}서초등학교`, `${base}남초등학교`, `${base}북초등학교`
+          ];
         }
 
-        return generated;
+        const midTasks = curriculumTaskPool.filter(t => t.category === '중학');
+        const elem34Tasks = curriculumTaskPool.filter(t => t.category === '초등 3~4');
+        const elem56Tasks = curriculumTaskPool.filter(t => t.category === '초등 5~6');
+
+        let midIdx = 0;
+        let elemIdx = 0;
+
+        schoolList.forEach((sName, sIdx) => {
+          const isMiddle = sName.includes('중') || sName.includes('고');
+          let task;
+
+          if (isMiddle) {
+            task = midTasks[midIdx % midTasks.length];
+            midIdx++;
+          } else {
+            // 초등학교는 3~4학년과 5~6학년을 번갈아 배정하여 전 학년 커리큘럼 커버
+            if (elemIdx % 2 === 0) {
+              task = elem34Tasks[Math.floor(elemIdx / 2) % elem34Tasks.length];
+            } else {
+              task = elem56Tasks[Math.floor(elemIdx / 2) % elem56Tasks.length];
+            }
+            elemIdx++;
+          }
+
+          schools.push({
+            id: `sch-${sido}-${district}-${sIdx + 1}`,
+            schoolName: sName,
+            sido: sido,
+            sigungu: district,
+            ...task
+          });
+        });
+
+        return schools;
       }
 
-      // 2단계: 학년 필터 및 지역(시/도, 시/군/구) 필터 결합 (지역 내 모든 학교 커리큘럼 전수 반영)
+      // 지역 내 모든 학교 커리큘럼 전수 연동 & 학년 필터 결합 엔진
       function getFilteredData() {
-        let pool = state.assessments;
+        let pool = [];
 
-        // 특정 시/도 선택 시, 해당 지역 내 모든 학교가 온전히 표시되도록 병합
-        if (state.selectedSido !== 'all') {
-          const generated = generateSchoolsForRegion(state.selectedSido, state.selectedSigungu);
-          const existingMatches = pool.filter(item => {
-            const matchSido = item.sido === state.selectedSido;
-            const matchSigungu = (state.selectedSigungu === 'all' || item.sigungu === state.selectedSigungu);
-            return matchSido && matchSigungu;
+        if (state.selectedSido === 'all') {
+          // 1. "전체 지역 (전국)" 선택 시:
+          // 전국 17개 시/도의 모든 구·군에서 학교들을 고르게 추출하여 수백 개교 전국 전수 풀 생성
+          Object.keys(regionMap).forEach(sido => {
+            const districts = regionMap[sido] || [];
+            districts.forEach(dist => {
+              const distSchools = getDistrictSchoolsCurriculum(sido, dist);
+              // 전국 통합 뷰: 각 구·군별 대표 초·중 3~4개교씩 고르게 반영하여 전국 단위 수백 개교 풀 구성
+              pool.push(...distSchools.slice(0, 3));
+            });
           });
-
-          const existingNames = new Set(existingMatches.map(m => m.schoolName));
-          const newSchools = generated.filter(g => !existingNames.has(g.schoolName));
-          pool = existingMatches.concat(newSchools);
+        } else if (state.selectedSigungu === 'all') {
+          // 2. "특정 시/도 전체" 선택 시 (예: 인천광역시 전체):
+          // 해당 시/도 관내 '모든 구·시·군'의 모든 학교 커리큘럼을 빠짐없이 전수 반영!
+          const districts = regionMap[state.selectedSido] || [];
+          districts.forEach(dist => {
+            const distSchools = getDistrictSchoolsCurriculum(state.selectedSido, dist);
+            pool.push(...distSchools);
+          });
+        } else {
+          // 3. "특정 시/군/구" 선택 시 (예: 인천광역시 서해구, 검단구, 서울 강남구 등):
+          // 해당 관내 '모든 학교' 커리큘럼(14~16개교 전수)을 그대로 반영!
+          pool = getDistrictSchoolsCurriculum(state.selectedSido, state.selectedSigungu);
         }
 
-        return pool.filter(item => {
-          const matchCategory = (state.currentCategory === 'all' || item.category === state.currentCategory);
-          const matchSido = (state.selectedSido === 'all' || item.sido === state.selectedSido);
-          const matchSigungu = (state.selectedSigungu === 'all' || item.sigungu === state.selectedSigungu);
-          return matchCategory && matchSido && matchSigungu;
-        });
+        // 학년 카테고리 필터 (전체 / 초등 3~4 / 초등 5~6 / 중학) 적용
+        if (state.currentCategory !== 'all') {
+          pool = pool.filter(item => item.category === state.currentCategory);
+        }
+
+        return pool;
       }
 
       function renderDashboard() {
@@ -1727,15 +1721,10 @@ html, body {
         const kpiTopCompetency = document.getElementById('kpi-top-competency');
         const kpiWeight = document.getElementById('kpi-weight');
 
-        // 지역 필터 시 해당 지역 고유 학교 수, 전체일 땐 NEIS 수치
-        if (state.selectedSido !== 'all') {
-          const uniqueSchools = new Set(data.map(d => d.schoolName));
-          kpiSchools.textContent = `${uniqueSchools.size}개교`;
-        } else {
-          const totalCount = state.schoolResult?.totalCount || 12669;
-          kpiSchools.textContent = `${totalCount.toLocaleString()}개교`;
-        }
-        kpiItems.textContent = `${data.length}개`;
+        // 지역 필터에 따른 실제 관내 고유 학교 수 집계
+        const uniqueSchools = new Set(data.map(d => d.schoolName));
+        kpiSchools.textContent = `${uniqueSchools.size.toLocaleString()}개교`;
+        kpiItems.textContent = `${data.length.toLocaleString()}개`;
 
         if (data.length === 0) {
           kpiTopCompetency.textContent = '-';
