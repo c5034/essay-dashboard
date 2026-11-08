@@ -1,0 +1,12 @@
+# 환경 변수 및 민감 정보 파일
+.env
+.env.local
+config.js
+
+# 로그 파일
+*.log
+
+# 운영체제 메타데이터
+.DS_Store
+Thumbs.db
+

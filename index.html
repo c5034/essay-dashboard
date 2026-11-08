@@ -453,6 +453,91 @@ html, body {
   display: inline-flex;
 }
 
+.region-toast.error {
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.35);
+  color: #fb7185;
+}
+
+.saved-history-wrap {
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: rgba(17, 24, 39, 0.65);
+  border: 1px dashed rgba(99, 102, 241, 0.35);
+  border-radius: var(--radius-sm);
+}
+
+.saved-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.saved-history-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #a5b4fc;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-refresh-history {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-refresh-history:hover {
+  color: var(--text-main);
+  border-color: rgba(99, 102, 241, 0.5);
+  background: rgba(99, 102, 241, 0.12);
+}
+
+.saved-history-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-height: 28px;
+  align-items: center;
+}
+
+.history-item-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+  border-radius: 6px;
+  font-size: 0.76rem;
+  color: var(--text-main);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.history-item-badge:hover {
+  background: rgba(99, 102, 241, 0.25);
+  border-color: var(--primary);
+  transform: translateY(-1px);
+}
+
+.history-item-badge .badge-time {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+}
+
+.history-empty {
+  font-size: 0.76rem;
+  color: var(--text-dim);
+}
+
 @keyframes fadeInDown {
   from {
     opacity: 0;
@@ -838,6 +923,17 @@ html, body {
         <span class="toast-icon">✅</span>
         <span id="region-toast-text">내 지역으로 저장되었습니다.</span>
       </div>
+
+      <!-- Supabase 서버에 저장된 내 지역 기록 영역 -->
+      <div id="saved-history-wrap" class="saved-history-wrap">
+        <div class="saved-history-header">
+          <span class="saved-history-title">☁️ Supabase에 저장된 기록 (<span id="saved-history-count">0</span>건)</span>
+          <button type="button" id="refresh-history-btn" class="btn-refresh-history" title="새로고침">🔄 기록 새로고침</button>
+        </div>
+        <div id="saved-history-list" class="saved-history-list">
+          <span class="history-empty">서버에서 저장된 기록을 불러오는 중...</span>
+        </div>
+      </div>
     </section>
 
     <!-- 학년 선택 필터 바 -->
@@ -920,6 +1016,10 @@ html, body {
       </div>
     </aside>
   </main>
+
+  <!-- Supabase 공식 클라이언트 라이브러리 및 브라우저 공개 설정 로드 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="config.js"></script>
 
   <!-- ===================================================
        1. 데이터 통신 및 API 모듈 (인라인 통합)
@@ -1915,6 +2015,38 @@ html, body {
         const resetBtn = document.getElementById('reset-region-btn');
         const toast = document.getElementById('region-toast');
         const toastText = document.getElementById('region-toast-text');
+        const historyList = document.getElementById('saved-history-list');
+        const historyCount = document.getElementById('saved-history-count');
+        const refreshHistoryBtn = document.getElementById('refresh-history-btn');
+
+        // Supabase 클라이언트 초기화 (config.js 공개 키 사용)
+        let supabaseClient = null;
+        if (window.supabase && typeof SUPABASE_CONFIG !== 'undefined' && SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
+          try {
+            supabaseClient = window.supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+          } catch (e) {
+            console.error('Supabase 클라이언트 생성 실패:', e);
+          }
+        }
+
+        let toastTimeout = null;
+        function showToast(message, isError = false) {
+          if (!toast || !toastText) return;
+          const toastIcon = toast.querySelector('.toast-icon');
+          toastText.textContent = message;
+          if (isError) {
+            toast.classList.add('error');
+            if (toastIcon) toastIcon.textContent = '❌';
+          } else {
+            toast.classList.remove('error');
+            if (toastIcon) toastIcon.textContent = '✅';
+          }
+          toast.classList.add('show');
+          if (toastTimeout) clearTimeout(toastTimeout);
+          toastTimeout = setTimeout(() => {
+            toast.classList.remove('show');
+          }, 4000);
+        }
 
         function populateSigungu(selectedSido) {
           sigunguSelect.innerHTML = '<option value="all">시/군/구 전체</option>';
@@ -1928,33 +2060,97 @@ html, body {
           }
         }
 
-        // 4단계: 페이지 로드 시 localStorage에서 저장된 지역 자동 복원
-        const savedRegion = localStorage.getItem('myRegion');
-        if (savedRegion) {
-          try {
-            const { sido, sigungu } = JSON.parse(savedRegion);
-            if (sido && sidoSelect) {
-              sidoSelect.value = sido;
-              state.selectedSido = sido;
-              populateSigungu(sido);
-              if (sigungu && sigungu !== 'all' && sigunguSelect) {
-                sigunguSelect.value = sigungu;
-                state.selectedSigungu = sigungu;
-              }
-              updateBadge();
-              renderDashboard();
-            } else {
-              populateSigungu(sidoSelect.value);
-            }
-          } catch (e) {
-            populateSigungu(sidoSelect ? sidoSelect.value : 'all');
+        function applyRegionSelection(sido, sigungu) {
+          if (!sidoSelect || !sigunguSelect) return;
+          sidoSelect.value = sido;
+          state.selectedSido = sido;
+          populateSigungu(sido);
+          if (sigungu && sigungu !== 'all') {
+            sigunguSelect.value = sigungu;
+            state.selectedSigungu = sigungu;
+          } else {
+            sigunguSelect.value = 'all';
+            state.selectedSigungu = 'all';
           }
-        } else {
-          // 저장된 지역 없으면 초기 시/군/구 목록만 채우기
-          if (sidoSelect) {
-            populateSigungu(sidoSelect.value);
+          updateBadge();
+          renderDashboard();
+        }
+
+        // Supabase 표(saved_regions)에서 저장된 줄들을 모두 불러와 화면에 표시
+        async function fetchAndRenderHistory() {
+          if (!historyList) return;
+
+          if (!supabaseClient) {
+            historyList.innerHTML = '<span class="history-empty">⚠️ Supabase 클라이언트 미연결 (config.js 확인 필요)</span>';
+            return;
+          }
+
+          historyList.innerHTML = '<span class="history-empty">☁️ 서버에서 저장된 줄을 불러오는 중...</span>';
+
+          try {
+            const { data, error } = await supabaseClient
+              .from('saved_regions')
+              .select('id, sido, sigungu, created_at')
+              .order('created_at', { ascending: false })
+              .limit(10);
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+              if (historyCount) historyCount.textContent = '0';
+              historyList.innerHTML = '<span class="history-empty">아직 서버에 저장된 지역 기록이 없습니다. 위에서 지역을 고르고 [내 지역으로 저장]을 눌러보세요.</span>';
+              return;
+            }
+
+            if (historyCount) historyCount.textContent = data.length.toString();
+            historyList.innerHTML = '';
+
+            data.forEach((row, idx) => {
+              const item = document.createElement('button');
+              item.type = 'button';
+              item.className = 'history-item-badge';
+
+              const timeStr = row.created_at
+                ? new Date(row.created_at).toLocaleString('ko-KR', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })
+                : '';
+
+              const regionLabel = row.sido === 'all'
+                ? '전체 지역'
+                : (row.sigungu === 'all' ? `${row.sido} 전체` : `${row.sido} ${row.sigungu}`);
+
+              item.innerHTML = `
+                <span>📍 #${row.id || (idx + 1)} ${regionLabel}</span>
+                <span class="badge-time">${timeStr}</span>
+              `;
+
+              item.title = '클릭하면 이 지역으로 화면 필터를 적용합니다';
+              item.addEventListener('click', () => {
+                applyRegionSelection(row.sido, row.sigungu);
+                showToast(`선택한 기록(${regionLabel})으로 화면을 적용했습니다.`, false);
+              });
+
+              historyList.appendChild(item);
+            });
+
+            // 가장 최근 저장된 첫 번째 줄로 화면 자동 세팅
+            const latest = data[0];
+            if (latest && latest.sido) {
+              applyRegionSelection(latest.sido, latest.sigungu);
+            }
+          } catch (err) {
+            console.error('Supabase 기록 조회 실패:', err);
+            if (historyList) {
+              historyList.innerHTML = `<span class="history-empty" style="color: #fb7185;">⚠️ 불러오기 실패: ${err.message || '오류 발생'}</span>`;
+            }
           }
         }
+
+        // 초기 실행: 서버에서 저장된 기록 불러오기
+        fetchAndRenderHistory();
+
+        refreshHistoryBtn?.addEventListener('click', () => {
+          fetchAndRenderHistory();
+        });
 
         function updateBadge() {
           if (!badge || !sidoSelect || !sigunguSelect) return;
@@ -1975,36 +2171,59 @@ html, body {
           state.selectedSigungu = 'all'; // 시/도 변경 시 구는 전체로 초기화
           populateSigungu(selectedSido);
           updateBadge();
-          renderDashboard(); // 2단계: 지역 변경 시 즉시 대시보드 데이터 갱신
+          renderDashboard(); // 지역 변경 시 즉시 대시보드 데이터 갱신
         });
 
         sigunguSelect?.addEventListener('change', () => {
           state.selectedSigungu = sigunguSelect.value;
           updateBadge();
-          renderDashboard(); // 2단계: 시/군/구 변경 시 즉시 대시보드 데이터 갱신
+          renderDashboard(); // 시/군/구 변경 시 즉시 대시보드 데이터 갱신
         });
 
-        // 3단계: [내 지역으로 저장] 버튼 - localStorage에 저장
-        let toastTimeout = null;
-        saveBtn?.addEventListener('click', () => {
+        // [내 지역으로 저장] 버튼 클릭 시 Supabase 표에 저장
+        saveBtn?.addEventListener('click', async () => {
           const sido = sidoSelect.value;
           const sigungu = sigunguSelect.value;
           const regionText = sido === 'all' ? '전체 지역' : (sigungu === 'all' ? `${sido} 전체` : `${sido} ${sigungu}`);
 
-          // localStorage에 지역 정보 및 저장 일시 기록
-          const saveData = {
-            sido: sido,
-            sigungu: sigungu,
-            savedAt: new Date().toISOString()
-          };
-          localStorage.setItem('myRegion', JSON.stringify(saveData));
+          if (!supabaseClient) {
+            showToast('설정 오류: Supabase 클라이언트를 초기화하지 못했습니다. (config.js 확인)', true);
+            return;
+          }
 
-          toastText.textContent = `내 지역으로 저장되었습니다. (${regionText})`;
-          toast.classList.add('show');
-          if (toastTimeout) clearTimeout(toastTimeout);
-          toastTimeout = setTimeout(() => {
-            toast.classList.remove('show');
-          }, 3000);
+          const originalText = saveBtn.textContent;
+          saveBtn.disabled = true;
+          saveBtn.textContent = '⏳ 저장 중...';
+
+          try {
+            // Supabase saved_regions 테이블에 한 줄 추가
+            const { data, error } = await supabaseClient
+              .from('saved_regions')
+              .insert([{ sido: sido, sigungu: sigungu }]);
+
+            if (error) {
+              throw error;
+            }
+
+            // 브라우저 백업 동기화
+            localStorage.setItem('myRegion', JSON.stringify({
+              sido: sido,
+              sigungu: sigungu,
+              savedAt: new Date().toISOString()
+            }));
+
+            showToast(`내 지역이 Supabase 서버에 저장되었습니다. (${regionText})`, false);
+
+            // 방금 저장된 줄을 포함하여 화면 목록 즉시 갱신
+            fetchAndRenderHistory();
+          } catch (err) {
+            console.error('Supabase 저장 실패:', err);
+            const errMsg = err?.message || '네트워크 또는 서버 오류';
+            showToast(`저장 실패: ${errMsg}`, true);
+          } finally {
+            saveBtn.disabled = false;
+            saveBtn.textContent = originalText;
+          }
         });
 
         resetBtn?.addEventListener('click', () => {
@@ -2013,7 +2232,7 @@ html, body {
           state.selectedSido = 'all';
           state.selectedSigungu = 'all';
           updateBadge();
-          renderDashboard(); // 2단계: 필터 해제 시 전체 데이터로 복귀
+          renderDashboard(); // 필터 해제 시 전체 데이터로 복귀
         });
       }
 
